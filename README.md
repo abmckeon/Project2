@@ -92,57 +92,49 @@ wee used for analysis.
 
 -   We will first read in the data set and manipulate the necessary
     variables.
-
-train/test model selection graphs tables etc
+-   The data will be separated into a training and test set. This will
+    be a 70/30 split.
+-   We will include some contingency tables at each setting of our
+    categorical variables to get a better idea of the data at hand. We
+    will also include summary statistics for quantitative variables. The
+    data for these summaries will be used via the *training* data.
+-   We will include a variety of graphs to better visualize our data.
+    These graphs will be described in a more subjective manner so that
+    automation of each setting of this report makes more sense. We will
+    still be using the *training* data.
+-   Finally, we will be using machine learning methods via Random
+    Forrest Boosted Tree models. These models will be explained in
+    greater detail in their respective section.
 
 ## Packages
 
-need to add more + add basic descriptions of them
+Below is a list of necessary packages that will aid our data analysis
+and modeling.
+
+-   `tidyverse` is a collection of useful packages designed for data
+    science.
+-   `ggplot2` is an amazing way to create visually pleasing and
+    informative graphics.
+-   `caret` is a set of functions that streamline the process of
+    implementing machine learning methods.
+-   `rmarkdown` is a useful package for creating R Markdown documents in
+    a variety of formats.
+-   `knitr` is a useful package to integrate computing and reporting.
 
 ``` r
 library(tidyverse)
 library(ggplot2)
+library(caret)
+library(rmarkdown)
+library(knitr)
 ```
 
 # Read in Data
 
 ``` r
 newsData <- read_csv("/Users/owensnyder/Desktop/OnlineNewsPopularity.csv")
-```
-
-    ## Rows: 39644 Columns: 61
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr  (1): url
-    ## dbl (60): timedelta, n_tokens_title, n_tokens_content, n_unique_tokens, n_non_stop_words, n_non_stop_un...
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
 newsData
 ```
-
-    ## # A tibble: 39,644 × 61
-    ##    url          timedelta n_tokens_title n_tokens_content n_unique_tokens n_non_stop_words n_non_stop_uniq…
-    ##    <chr>            <dbl>          <dbl>            <dbl>           <dbl>            <dbl>            <dbl>
-    ##  1 http://mash…       731             12              219           0.664             1.00            0.815
-    ##  2 http://mash…       731              9              255           0.605             1.00            0.792
-    ##  3 http://mash…       731              9              211           0.575             1.00            0.664
-    ##  4 http://mash…       731              9              531           0.504             1.00            0.666
-    ##  5 http://mash…       731             13             1072           0.416             1.00            0.541
-    ##  6 http://mash…       731             10              370           0.560             1.00            0.698
-    ##  7 http://mash…       731              8              960           0.418             1.00            0.550
-    ##  8 http://mash…       731             12              989           0.434             1.00            0.572
-    ##  9 http://mash…       731             11               97           0.670             1.00            0.837
-    ## 10 http://mash…       731             10              231           0.636             1.00            0.797
-    ## # … with 39,634 more rows, and 54 more variables: num_hrefs <dbl>, num_self_hrefs <dbl>, num_imgs <dbl>,
-    ## #   num_videos <dbl>, average_token_length <dbl>, num_keywords <dbl>, data_channel_is_lifestyle <dbl>,
-    ## #   data_channel_is_entertainment <dbl>, data_channel_is_bus <dbl>, data_channel_is_socmed <dbl>,
-    ## #   data_channel_is_tech <dbl>, data_channel_is_world <dbl>, kw_min_min <dbl>, kw_max_min <dbl>,
-    ## #   kw_avg_min <dbl>, kw_min_max <dbl>, kw_max_max <dbl>, kw_avg_max <dbl>, kw_min_avg <dbl>,
-    ## #   kw_max_avg <dbl>, kw_avg_avg <dbl>, self_reference_min_shares <dbl>, self_reference_max_shares <dbl>,
-    ## #   self_reference_avg_sharess <dbl>, weekday_is_monday <dbl>, weekday_is_tuesday <dbl>, …
 
 # Create New Variable
 
@@ -151,8 +143,9 @@ columns of data, we figured it would be easier to combine every channel
 into one column. That way, we will be working with one single channel
 variable that takes on unique values of Lifestyle, Entertainment,
 Business, Social Media, Tech, and World. This will make automation and
-analysis more clear. Note that the orginal data tells us that a data for
-either channel is 1 or 0. meaning that 1 means “yes” and 0 means “no”.
+analysis more clear. Note that the original data tells us that a data
+for either channel is 1 or 0. meaning that 1 means “yes” and 0 means
+“no”.
 
 ``` r
 ## use mutate() to create a new channel variable

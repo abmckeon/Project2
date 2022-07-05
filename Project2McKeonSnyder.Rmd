@@ -62,20 +62,27 @@ Finally, the six data channels we will be working with come from these key varia
 Before we get started, it is important to briefly describe the methods wee used for analysis.  
 
 * We will first read in the data set and manipulate the necessary variables.
-
-train/test
-model selection
-graphs
-tables
-etc
-
+* The data will be separated into a training and test set. This will be a 70/30 split.
+* We will include some contingency tables at each setting of our categorical variables to get a better idea of the data at hand. We will also include summary statistics for quantitative variables. The data for these summaries will be used via the *training* data.
+* We will include a variety of graphs to better visualize our data. These graphs will be described in a more subjective manner so that automation of each setting of this report makes more sense. We will still be using the *training* data.
+* Finally, we will be using machine learning methods via Random Forrest Boosted Tree models. These models will be explained in greater detail in their respective section.
 
 ## Packages
 
-need to add more + add basic descriptions of them
-```{r}
+Below is a list of necessary packages that will aid our data analysis and modeling.  
+
+* `tidyverse` is a collection of useful packages designed for data science.
+* `ggplot2` is an amazing way to create visually pleasing and informative graphics.
+* `caret` is a set of functions that streamline the process of implementing machine learning methods.
+* `rmarkdown` is a useful package for creating R Markdown documents in a variety of formats.
+* `knitr` is a useful package to integrate computing and reporting.
+
+```{r warning=FALSE,message=FALSE}
 library(tidyverse)
 library(ggplot2)
+library(caret)
+library(rmarkdown)
+library(knitr)
 
 ```
 
@@ -83,16 +90,16 @@ library(ggplot2)
 
 # Read in Data
 
-```{r}
+```{r warning=FALSE,message=FALSE}
 newsData <- read_csv("/Users/owensnyder/Desktop/OnlineNewsPopularity.csv")
 newsData
 ```
 
 # Create New Variable
 
-Because we are working with six different channels across six different columns of data, we figured it would be easier to combine every channel into one column. That way, we will be working with one single channel variable that takes on unique values of Lifestyle, Entertainment, Business, Social Media, Tech, and World. This will make automation and analysis more clear. Note that the orginal data tells us that a data for either channel is 1 or 0. meaning that 1 means "yes" and 0 means "no".
+Because we are working with six different channels across six different columns of data, we figured it would be easier to combine every channel into one column. That way, we will be working with one single channel variable that takes on unique values of Lifestyle, Entertainment, Business, Social Media, Tech, and World. This will make automation and analysis more clear. Note that the original data tells us that a data for either channel is 1 or 0. meaning that 1 means "yes" and 0 means "no".
 
-```{r}
+```{r warning=FALSE,message=FALSE}
 ## use mutate() to create a new channel variable
 newsData <- newsData %>% mutate(dataChannel = case_when(
              data_channel_is_lifestyle==1 ~ "Lifestyle",
