@@ -9,7 +9,10 @@ Owen Snyder
     -   [Methods](#methods)
     -   [Packages](#packages)
 -   [Read in Data](#read-in-data)
--   [Create New Variable](#create-new-variable)
+-   [Create New Variables](#create-new-variables)
+-   [Split Data: Train/Test Set](#split-data-traintest-set)
+-   [Numerical Summaries](#numerical-summaries)
+-   [Contingency Tables](#contingency-tables)
 
 Render Function
 
@@ -136,7 +139,28 @@ newsData <- read_csv("/Users/owensnyder/Desktop/OnlineNewsPopularity.csv")
 newsData
 ```
 
-# Create New Variable
+    ## # A tibble: 39,644 × 61
+    ##    url          timedelta n_tokens_title n_tokens_content n_unique_tokens n_non_stop_words n_non_stop_uniq…
+    ##    <chr>            <dbl>          <dbl>            <dbl>           <dbl>            <dbl>            <dbl>
+    ##  1 http://mash…       731             12              219           0.664             1.00            0.815
+    ##  2 http://mash…       731              9              255           0.605             1.00            0.792
+    ##  3 http://mash…       731              9              211           0.575             1.00            0.664
+    ##  4 http://mash…       731              9              531           0.504             1.00            0.666
+    ##  5 http://mash…       731             13             1072           0.416             1.00            0.541
+    ##  6 http://mash…       731             10              370           0.560             1.00            0.698
+    ##  7 http://mash…       731              8              960           0.418             1.00            0.550
+    ##  8 http://mash…       731             12              989           0.434             1.00            0.572
+    ##  9 http://mash…       731             11               97           0.670             1.00            0.837
+    ## 10 http://mash…       731             10              231           0.636             1.00            0.797
+    ## # … with 39,634 more rows, and 54 more variables: num_hrefs <dbl>, num_self_hrefs <dbl>, num_imgs <dbl>,
+    ## #   num_videos <dbl>, average_token_length <dbl>, num_keywords <dbl>, data_channel_is_lifestyle <dbl>,
+    ## #   data_channel_is_entertainment <dbl>, data_channel_is_bus <dbl>, data_channel_is_socmed <dbl>,
+    ## #   data_channel_is_tech <dbl>, data_channel_is_world <dbl>, kw_min_min <dbl>, kw_max_min <dbl>,
+    ## #   kw_avg_min <dbl>, kw_min_max <dbl>, kw_max_max <dbl>, kw_avg_max <dbl>, kw_min_avg <dbl>,
+    ## #   kw_max_avg <dbl>, kw_avg_avg <dbl>, self_reference_min_shares <dbl>, self_reference_max_shares <dbl>,
+    ## #   self_reference_avg_sharess <dbl>, weekday_is_monday <dbl>, weekday_is_tuesday <dbl>, …
+
+# Create New Variables
 
 Because we are working with six different channels across six different
 columns of data, we figured it would be easier to combine every channel
@@ -149,24 +173,28 @@ for either channel is 1 or 0. meaning that 1 means “yes” and 0 means
 
 ``` r
 ## use mutate() to create a new channel variable
-newsData <- newsData %>% mutate(dataChannel = case_when(
-             data_channel_is_lifestyle==1 ~ "Lifestyle",
-             data_channel_is_entertainment==1 ~"Entertainment",
-             data_channel_is_bus==1 ~ "Business",
-             data_channel_is_socmed==1 ~ "Social Media",
-             data_channel_is_tech==1 ~ "Tech",
-             data_channel_is_world==1 ~ "World"
-))
+newsData <- newsData %>% mutate(dataChannel = 
+                              ifelse(data_channel_is_bus==1, "Business",
+                              ifelse(data_channel_is_entertainment==1, "Entertainment",
+                              ifelse(data_channel_is_lifestyle==1, "Lifestyle",
+                              ifelse(data_channel_is_socmed==1, "Social Media",
+                              ifelse(data_channel_is_tech==1, "Tech",
+                              ifelse(data_channel_is_world==1, "World", "Other")))))))
+
 ## upon inspection, there are NA values present, this could be due to some articles not having
 ## one of these specific categories
-##is.na(newsData$channel)
 
-## now change the NA values to "Other"
-newsData$dataChannel <-  replace_na(newsData$dataChannel, "Other")
-##newsData$channel <- as.factor(newsData$channel)
+
+
 ## convert to a factor for analysis??
 
 #newsData
 
 #summary(newsData)
 ```
+
+# Split Data: Train/Test Set
+
+# Numerical Summaries
+
+# Contingency Tables
