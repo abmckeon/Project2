@@ -154,14 +154,28 @@ NOTE: NEED TO REMOVE VARIABLES!! i.e the variables that are based on new variabl
 
 ```{r}
 set.seed(558) ## set seed for reproducibility
-trainIndex <- createDataPartition(newsData$shares, p = 0.70, list = FALSE)
-newsTrain <- newsData[trainIndex, ]
-newsTest <- newsData[-trainIndex, ]
+#trainIndex <- createDataPartition(newsData$shares, p = 0.70, list = FALSE)
+#newsTrain <- newsData[trainIndex, ]
+#newsTest <- newsData[-trainIndex, ]
+
+trainIndex <- createDataPartition(channel.data$shares, p = 0.70, list = FALSE)
+newsTrain <- channel.data[trainIndex, ]
+newsTest <- channel.data[-trainIndex, ]
+
+
 ```
 
 
 
 # Numerical Summaries
+
+This section is dedicated to creating basic summary statistics for our response variables, **shares**. Before performing more in depth analysis and modeling, it is important to get a better idea of how our data is distributed. For example, one should take note of means, median, and standard deviations. Another aspect to note is that if the median is greater than the mean then our data is likely skewed to the left. Conversely, if the median is less than the mean, the data is likely skewed to the right.  
+
+```{r}
+newsTrain %>% summarise(avgShares = mean(shares), medianShares = median(shares), sdShares = sd(shares))
+
+```
+
 
 
 
@@ -186,6 +200,10 @@ This is a histogram of the shares variable. We wanted to get a better idea of ho
 hist.shares <- ggplot(data = newsTrain, aes(x = shares))
 hist.shares + geom_histogram(bins = 50, binwidth = 40) + scale_x_continuous(breaks = seq(0, 100, 5))
 
+hist99 <- ggplot(data = newsTrain, aes(x = shares))
+hist99 + geom_histogram(binwidth = 10)
+
+#hist(newsTrain$shares)
 #summary(newsTrain$shares)
 #hist(newsTrain$shares)
 

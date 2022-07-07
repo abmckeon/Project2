@@ -158,24 +158,24 @@ newsData
 ```
 
     ## # A tibble: 39,644 × 61
-    ##    url          timedelta n_tokens_title n_tokens_content n_unique_tokens n_non_stop_words n_non_stop_uniq…
-    ##    <chr>            <dbl>          <dbl>            <dbl>           <dbl>            <dbl>            <dbl>
-    ##  1 http://mash…       731             12              219           0.664             1.00            0.815
-    ##  2 http://mash…       731              9              255           0.605             1.00            0.792
-    ##  3 http://mash…       731              9              211           0.575             1.00            0.664
-    ##  4 http://mash…       731              9              531           0.504             1.00            0.666
-    ##  5 http://mash…       731             13             1072           0.416             1.00            0.541
-    ##  6 http://mash…       731             10              370           0.560             1.00            0.698
-    ##  7 http://mash…       731              8              960           0.418             1.00            0.550
-    ##  8 http://mash…       731             12              989           0.434             1.00            0.572
-    ##  9 http://mash…       731             11               97           0.670             1.00            0.837
-    ## 10 http://mash…       731             10              231           0.636             1.00            0.797
-    ## # … with 39,634 more rows, and 54 more variables: num_hrefs <dbl>, num_self_hrefs <dbl>, num_imgs <dbl>,
-    ## #   num_videos <dbl>, average_token_length <dbl>, num_keywords <dbl>, data_channel_is_lifestyle <dbl>,
+    ##    url       timedelta n_tokens_title n_tokens_content n_unique_tokens n_non_stop_words n_non_stop_uniq… num_hrefs
+    ##    <chr>         <dbl>          <dbl>            <dbl>           <dbl>            <dbl>            <dbl>     <dbl>
+    ##  1 http://m…       731             12              219           0.664             1.00            0.815         4
+    ##  2 http://m…       731              9              255           0.605             1.00            0.792         3
+    ##  3 http://m…       731              9              211           0.575             1.00            0.664         3
+    ##  4 http://m…       731              9              531           0.504             1.00            0.666         9
+    ##  5 http://m…       731             13             1072           0.416             1.00            0.541        19
+    ##  6 http://m…       731             10              370           0.560             1.00            0.698         2
+    ##  7 http://m…       731              8              960           0.418             1.00            0.550        21
+    ##  8 http://m…       731             12              989           0.434             1.00            0.572        20
+    ##  9 http://m…       731             11               97           0.670             1.00            0.837         2
+    ## 10 http://m…       731             10              231           0.636             1.00            0.797         4
+    ## # … with 39,634 more rows, and 53 more variables: num_self_hrefs <dbl>, num_imgs <dbl>, num_videos <dbl>,
+    ## #   average_token_length <dbl>, num_keywords <dbl>, data_channel_is_lifestyle <dbl>,
     ## #   data_channel_is_entertainment <dbl>, data_channel_is_bus <dbl>, data_channel_is_socmed <dbl>,
     ## #   data_channel_is_tech <dbl>, data_channel_is_world <dbl>, kw_min_min <dbl>, kw_max_min <dbl>,
-    ## #   kw_avg_min <dbl>, kw_min_max <dbl>, kw_max_max <dbl>, kw_avg_max <dbl>, kw_min_avg <dbl>,
-    ## #   kw_max_avg <dbl>, kw_avg_avg <dbl>, self_reference_min_shares <dbl>, self_reference_max_shares <dbl>,
+    ## #   kw_avg_min <dbl>, kw_min_max <dbl>, kw_max_max <dbl>, kw_avg_max <dbl>, kw_min_avg <dbl>, kw_max_avg <dbl>,
+    ## #   kw_avg_avg <dbl>, self_reference_min_shares <dbl>, self_reference_max_shares <dbl>,
     ## #   self_reference_avg_sharess <dbl>, weekday_is_monday <dbl>, weekday_is_tuesday <dbl>, …
 
 ``` r
@@ -243,12 +243,34 @@ variables need to be deleted from data set.
 
 ``` r
 set.seed(558) ## set seed for reproducibility
-trainIndex <- createDataPartition(newsData$shares, p = 0.70, list = FALSE)
-newsTrain <- newsData[trainIndex, ]
-newsTest <- newsData[-trainIndex, ]
+#trainIndex <- createDataPartition(newsData$shares, p = 0.70, list = FALSE)
+#newsTrain <- newsData[trainIndex, ]
+#newsTest <- newsData[-trainIndex, ]
+
+trainIndex <- createDataPartition(channel.data$shares, p = 0.70, list = FALSE)
+newsTrain <- channel.data[trainIndex, ]
+newsTest <- channel.data[-trainIndex, ]
 ```
 
 # Numerical Summaries
+
+This section is dedicated to creating basic summary statistics for our
+response variables, **shares**. Before performing more in depth analysis
+and modeling, it is important to get a better idea of how our data is
+distributed. For example, one should take note of means, median, and
+standard deviations. Another aspect to note is that if the median is
+greater than the mean then our data is likely skewed to the left.
+Conversely, if the median is less than the mean, the data is likely
+skewed to the right.
+
+``` r
+newsTrain %>% summarise(avgShares = mean(shares), medianShares = median(shares), sdShares = sd(shares))
+```
+
+    ## # A tibble: 1 × 3
+    ##   avgShares medianShares sdShares
+    ##       <dbl>        <dbl>    <dbl>
+    ## 1     3266.         1400   17569.
 
 # Contingency Tables
 
@@ -273,9 +295,17 @@ hist.shares <- ggplot(data = newsTrain, aes(x = shares))
 hist.shares + geom_histogram(bins = 50, binwidth = 40) + scale_x_continuous(breaks = seq(0, 100, 5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
 
 ``` r
+hist99 <- ggplot(data = newsTrain, aes(x = shares))
+hist99 + geom_histogram(binwidth = 10)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-30-2.png)<!-- -->
+
+``` r
+#hist(newsTrain$shares)
 #summary(newsTrain$shares)
 #hist(newsTrain$shares)
 ```
@@ -292,14 +322,14 @@ sp1 <- ggplot(data = newsTrain, aes(x = shares, y = num_imgs))
 sp1 + geom_point()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
 
 ``` r
 sp2 <- ggplot(data = newsTrain, aes(x = shares, y = num_hrefs))
 sp2 + geom_point()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-24-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-31-2.png)<!-- -->
 
 ## Plot 6 -
 
