@@ -96,6 +96,7 @@ library(knitr)
 ```{r warning=FALSE,message=FALSE}
 newsData <- read_csv("/Users/owensnyder/Desktop/OnlineNewsPopularity.csv")
 newsData
+## change path
 ```
 
 # Create New Variables
@@ -203,12 +204,62 @@ First, it is important to describe in detail the methods behind each of these mo
  NOTE: i can also do this part if need be!
 
 ## lm Model 1
+Owen **Full Linear Model** using all of our variables of interest. explain in more detail.
+
+```{r}
+## set up trainControl using 5-fold cross validation
+trnCntrl <- trainControl(method = "cv", number=5)
+## NewtrnCntrl for ENSEMBLE METHODS
+NewtrnCntrl <- trainControl(method = "cv", number=5, repeats=3)
 
 
+
+
+## now fit linear model for all of our chosen predictors
+lmFit1 <- train(shares ~ n_tokens_title + average_token_length + global_rate_positive_words +
+                         global_rate_negative_words + num_imgs + num_videos + num_hrefs,
+                data = newsTrain,
+                method = "lm",
+                trControl = trnCntrl)
+##pre process
+
+
+## Now predict on the TEST data!
+lmFit1.pred <- predict(lmFit1, newdata = newsTest)
+
+```
 
 ## lm Model 2
+Ashlee
+
+
 
 ## Ensemble 1
-
+Ashlee
 ## Ensemble 2
+Owen  **Boosted Tree Model**. This is a boosted tree model using all variables we have selected for analysis as predictors.
 
+```{r cache=TRUE}
+gbmGrid <-  expand.grid(interaction.depth = c(1,2,3,4), 
+                        n.trees = c(25,50,100,150,200), 
+                        shrinkage = 0.1,
+                        n.minobsinnode = 10)
+
+boostFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_positive_words +
+                         global_rate_negative_words + num_imgs + num_videos + num_hrefs,
+                  data = newsTrain,
+                  method = "gbm",
+                  trControl = NewtrnCntrl,
+                  preProcess = c("center", "scale"),
+                  tuneGrid = gbmGrid,
+                  verbose = FALSE)
+
+
+```
+
+
+
+
+
+
+# Model Comparison???

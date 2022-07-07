@@ -24,7 +24,7 @@ Owen Snyder
     -   [lm Model 1](#lm-model-1)
     -   [lm Model 2](#lm-model-2)
     -   [Ensemble 1](#ensemble-1)
-    -   [Ensemble 2](#ensemble-2)
+-   [Model Comparison???](#model-comparison)
 
 Render Function
 
@@ -175,6 +175,10 @@ newsData
     ## #   kw_max_avg <dbl>, kw_avg_avg <dbl>, self_reference_min_shares <dbl>, self_reference_max_shares <dbl>,
     ## #   self_reference_avg_sharess <dbl>, weekday_is_monday <dbl>, weekday_is_tuesday <dbl>, …
 
+``` r
+## change path
+```
+
 # Create New Variables
 
 Because we are working with six different channels across six different
@@ -252,7 +256,7 @@ hist.shares <- ggplot(data = newsTrain, aes(x = shares))
 hist.shares + geom_histogram(bins = 50, binwidth = 40) + scale_x_continuous(breaks = seq(0, 100, 5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
 #summary(newsTrain$shares)
@@ -271,14 +275,14 @@ sp1 <- ggplot(data = newsTrain, aes(x = shares, y = num_imgs))
 sp1 + geom_point()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 ``` r
 sp2 <- ggplot(data = newsTrain, aes(x = shares, y = num_hrefs))
 sp2 + geom_point()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-20-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
 
 ## Plot 6 -
 
@@ -301,8 +305,56 @@ NOTE: i can also do this part if need be!
 
 ## lm Model 1
 
+Owen **Full Linear Model** using all of our variables of interest.
+explain in more detail.
+
+``` r
+## set up trainControl using 5-fold cross validation
+trnCntrl <- trainControl(method = "cv", number=5)
+## NewtrnCntrl for ENSEMBLE METHODS
+NewtrnCntrl <- trainControl(method = "cv", number=5, repeats=3)
+```
+
+    ## Warning: `repeats` has no meaning for this resampling method.
+
+``` r
+## now fit linear model for all of our chosen predictors
+lmFit1 <- train(shares ~ n_tokens_title + average_token_length + global_rate_positive_words +
+                         global_rate_negative_words + num_imgs + num_videos + num_hrefs,
+                data = newsTrain,
+                method = "lm",
+                trControl = trnCntrl)
+##pre process
+
+
+## Now predict on the TEST data!
+lmFit1.pred <- predict(lmFit1, newdata = newsTest)
+```
+
 ## lm Model 2
+
+Ashlee
 
 ## Ensemble 1
 
-## Ensemble 2
+Ashlee \## Ensemble 2 Owen **Boosted Tree Model**. This is a boosted
+tree model using all variables we have selected for analysis as
+predictors.
+
+``` r
+gbmGrid <-  expand.grid(interaction.depth = c(1,2,3,4), 
+                        n.trees = c(25,50,100,150,200), 
+                        shrinkage = 0.1,
+                        n.minobsinnode = 10)
+
+boostFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_positive_words +
+                         global_rate_negative_words + num_imgs + num_videos + num_hrefs,
+                  data = newsTrain,
+                  method = "gbm",
+                  trControl = NewtrnCntrl,
+                  preProcess = c("center", "scale"),
+                  tuneGrid = gbmGrid,
+                  verbose = FALSE)
+```
+
+# Model Comparison???
