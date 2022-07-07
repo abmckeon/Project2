@@ -201,7 +201,15 @@ newsData <- newsData %>% mutate(dataChannel =
                               ifelse(data_channel_is_lifestyle==1, "Lifestyle",
                               ifelse(data_channel_is_socmed==1, "Social Media",
                               ifelse(data_channel_is_tech==1, "Tech",
-                              ifelse(data_channel_is_world==1, "World", "Other")))))))
+                              ifelse(data_channel_is_world==1, "World", "Other"))))))) %>%
+                      mutate(dayOfWeek = 
+                               ifelse(weekday_is_monday==1, "Monday",
+                               ifelse(weekday_is_tuesday==1, "Tuesday",
+                               ifelse(weekday_is_wednesday==1, "Wednesday",
+                               ifelse(weekday_is_thursday==1, "Thursday",
+                               ifelse(weekday_is_friday==1, "Friday",
+                               ifelse(weekday_is_saturday==1, "Saturday",
+                               ifelse(weekday_is_sunday==1, "Sunday", "NULL"))))))))
 
 ## upon inspection, there are NA values present, this could be due to some articles not having
 ## one of these specific categories
@@ -274,6 +282,8 @@ newsTrain %>% summarise(avgShares = mean(shares), medianShares = median(shares),
 
 # Contingency Tables
 
+Ashlee
+
 # Plots
 
 This section is dedicated to visualization by means of the `ggplot2`
@@ -291,24 +301,12 @@ This is a histogram of the shares variable. We wanted to get a better
 idea of how this response variable is distributed.
 
 ``` r
-hist.shares <- ggplot(data = newsTrain, aes(x = shares))
-hist.shares + geom_histogram(bins = 50, binwidth = 40) + scale_x_continuous(breaks = seq(0, 100, 5))
+hist.shares <- ggplot(data = newsTrain, aes(x = log(shares)))
+hist.shares + geom_histogram(bins = 45, fill = "lightblue", colour = 8) +
+              ggtitle("Log Transformation of Shares")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
-
-``` r
-hist99 <- ggplot(data = newsTrain, aes(x = shares))
-hist99 + geom_histogram(binwidth = 10)
-```
-
-![](README_files/figure-gfm/unnamed-chunk-30-2.png)<!-- -->
-
-``` r
-#hist(newsTrain$shares)
-#summary(newsTrain$shares)
-#hist(newsTrain$shares)
-```
+![](README_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
 
 ## Plot 5 -
 
@@ -322,14 +320,14 @@ sp1 <- ggplot(data = newsTrain, aes(x = shares, y = num_imgs))
 sp1 + geom_point()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 ``` r
 sp2 <- ggplot(data = newsTrain, aes(x = shares, y = num_hrefs))
 sp2 + geom_point()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-31-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-24-2.png)<!-- -->
 
 ## Plot 6 -
 
