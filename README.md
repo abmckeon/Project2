@@ -24,6 +24,7 @@ Owen Snyder
     -   [lm Model 1](#lm-model-1)
     -   [lm Model 2](#lm-model-2)
     -   [Ensemble 1](#ensemble-1)
+    -   [Ensemble 2](#ensemble-2)
 -   [Model Comparison???](#model-comparison)
 
 Render Function
@@ -256,7 +257,7 @@ hist.shares <- ggplot(data = newsTrain, aes(x = shares))
 hist.shares + geom_histogram(bins = 50, binwidth = 40) + scale_x_continuous(breaks = seq(0, 100, 5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 #summary(newsTrain$shares)
@@ -275,14 +276,14 @@ sp1 <- ggplot(data = newsTrain, aes(x = shares, y = num_imgs))
 sp1 + geom_point()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 sp2 <- ggplot(data = newsTrain, aes(x = shares, y = num_hrefs))
 sp2 + geom_point()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
 ## Plot 6 -
 
@@ -337,9 +338,12 @@ Ashlee
 
 ## Ensemble 1
 
-Ashlee \## Ensemble 2 Owen **Boosted Tree Model**. This is a boosted
-tree model using all variables we have selected for analysis as
-predictors.
+Ashlee
+
+## Ensemble 2
+
+Owen **Boosted Tree Model**. This is a boosted tree model using all
+variables we have selected for analysis as predictors.
 
 ``` r
 gbmGrid <-  expand.grid(interaction.depth = c(1,2,3,4), 

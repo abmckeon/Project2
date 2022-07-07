@@ -235,11 +235,15 @@ Ashlee
 
 
 ## Ensemble 1
-Ashlee
+
+Ashlee  
+
+
 ## Ensemble 2
+  
 Owen  **Boosted Tree Model**. This is a boosted tree model using all variables we have selected for analysis as predictors.
 
-```{r cache=TRUE}
+```{r}
 gbmGrid <-  expand.grid(interaction.depth = c(1,2,3,4), 
                         n.trees = c(25,50,100,150,200), 
                         shrinkage = 0.1,
