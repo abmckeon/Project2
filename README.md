@@ -13,6 +13,18 @@ Owen Snyder
 -   [Split Data: Train/Test Set](#split-data-traintest-set)
 -   [Numerical Summaries](#numerical-summaries)
 -   [Contingency Tables](#contingency-tables)
+-   [Plots](#plots)
+    -   [Plot 1 -](#plot-1--)
+    -   [Plot 2 -](#plot-2--)
+    -   [Plot 3 -](#plot-3--)
+    -   [Plot 4 -](#plot-4--)
+    -   [Plot 5 -](#plot-5--)
+    -   [Plot 6 -](#plot-6--)
+-   [Modeling](#modeling)
+    -   [lm Model 1](#lm-model-1)
+    -   [lm Model 2](#lm-model-2)
+    -   [Ensemble 1](#ensemble-1)
+    -   [Ensemble 2](#ensemble-2)
 
 Render Function
 
@@ -62,6 +74,9 @@ The following our are variables of interest:
     content
 -   **global_rate_negative_words** - Rate of negative words in the
     content
+-   **num_imgs** - Number of images
+-   **num_videos** - Number of videos
+-   **num_hrefs** - Number of links
 
 For categorical variables, we will be using the following varibles. In
 fact, we will be combining the days of the week into one variable called
@@ -184,7 +199,7 @@ newsData <- newsData %>% mutate(dataChannel =
 ## upon inspection, there are NA values present, this could be due to some articles not having
 ## one of these specific categories
 
-
+#factor(newsData$dataChannel)
 
 ## convert to a factor for analysis??
 
@@ -195,6 +210,99 @@ newsData <- newsData %>% mutate(dataChannel =
 
 # Split Data: Train/Test Set
 
+In this section we will split our newsData into a training and test set.
+The training set will be used for model fitting and EDA while the test
+set will be used for predictions (verify). This will be a 70/30 split.
+
+NOTE: this will have to be re-ran due to the addition of the dayOfWeek
+variable. process will be the same but will to re-run all data chunks.
+
+NOTE: NEED TO REMOVE VARIABLES!! i.e the variables that are based on new
+variables need to be deleted from data set.
+
+``` r
+set.seed(558) ## set seed for reproducibility
+trainIndex <- createDataPartition(newsData$shares, p = 0.70, list = FALSE)
+newsTrain <- newsData[trainIndex, ]
+newsTest <- newsData[-trainIndex, ]
+```
+
 # Numerical Summaries
 
 # Contingency Tables
+
+# Plots
+
+This section is dedicated to visualization by means of the `ggplot2`
+package. (edit the toc headings below)
+
+## Plot 1 -
+
+## Plot 2 -
+
+## Plot 3 -
+
+## Plot 4 -
+
+This is a histogram of the shares variable. We wanted to get a better
+idea of how this response variable is distributed.
+
+``` r
+hist.shares <- ggplot(data = newsTrain, aes(x = shares))
+hist.shares + geom_histogram(bins = 50, binwidth = 40) + scale_x_continuous(breaks = seq(0, 100, 5))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+
+``` r
+#summary(newsTrain$shares)
+#hist(newsTrain$shares)
+```
+
+## Plot 5 -
+
+Next we will plot the number of images versus the number of shares. This
+will be done via a scatterplot because this will be able to give us a
+better visual of how these data are represented and if they are
+associated with one another.
+
+``` r
+sp1 <- ggplot(data = newsTrain, aes(x = shares, y = num_imgs))
+sp1 + geom_point()
+```
+
+![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+
+``` r
+sp2 <- ggplot(data = newsTrain, aes(x = shares, y = num_hrefs))
+sp2 + geom_point()
+```
+
+![](README_files/figure-gfm/unnamed-chunk-20-2.png)<!-- -->
+
+## Plot 6 -
+
+# Modeling
+
+The main goal of our modeling section is to create predictive models for
+predicting the number of shares based on our variables of interest. We
+will be using two linear regression type models and two ensemble
+tree-based models. Once these models are fit, we will be able to
+identify the best of the four.
+
+First, it is important to describe in detail the methods behind each of
+these model types.
+
+**Linear Models** – Ashlee describes …
+
+**Ensemble Models** – Ashlee describes …
+
+NOTE: i can also do this part if need be!
+
+## lm Model 1
+
+## lm Model 2
+
+## Ensemble 1
+
+## Ensemble 2
