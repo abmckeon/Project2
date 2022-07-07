@@ -10,6 +10,7 @@ Owen Snyder
     -   [Packages](#packages)
 -   [Read in Data](#read-in-data)
 -   [Create New Variables](#create-new-variables)
+    -   [Filter Data by Channel](#filter-data-by-channel)
 -   [Split Data: Train/Test Set](#split-data-traintest-set)
 -   [Numerical Summaries](#numerical-summaries)
 -   [Contingency Tables](#contingency-tables)
@@ -151,7 +152,8 @@ library(knitr)
 # Read in Data
 
 ``` r
-newsData <- read_csv("/Users/owensnyder/Desktop/OnlineNewsPopularity.csv")
+setwd("~/Desktop")
+newsData <- read_csv("OnlineNewsPopularity.csv")
 newsData
 ```
 
@@ -213,6 +215,20 @@ newsData <- newsData %>% mutate(dataChannel =
 #summary(newsData)
 ```
 
+## Filter Data by Channel
+
+``` r
+newsData.busn <- newsData %>% filter(dataChannel=="Business")
+newsData.ent <- newsData %>% filter(dataChannel=="Entertainment")
+newsData.life <- newsData %>% filter(dataChannel=="Lifestyle")
+newsData.socmed <- newsData %>% filter(dataChannel=="Social Media")
+newsData.tech <- newsData %>% filter(dataChannel=="Tech")
+newsData.wrld <- newsData %>% filter(dataChannel=="World")
+
+
+channel.data <- newsData %>% filter(dataChannel == params$dataChannel)
+```
+
 # Split Data: Train/Test Set
 
 In this section we will split our newsData into a training and test set.
@@ -257,7 +273,7 @@ hist.shares <- ggplot(data = newsTrain, aes(x = shares))
 hist.shares + geom_histogram(bins = 50, binwidth = 40) + scale_x_continuous(breaks = seq(0, 100, 5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
 
 ``` r
 #summary(newsTrain$shares)
@@ -276,14 +292,14 @@ sp1 <- ggplot(data = newsTrain, aes(x = shares, y = num_imgs))
 sp1 + geom_point()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 ``` r
 sp2 <- ggplot(data = newsTrain, aes(x = shares, y = num_hrefs))
 sp2 + geom_point()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-24-2.png)<!-- -->
 
 ## Plot 6 -
 

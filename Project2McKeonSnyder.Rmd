@@ -3,6 +3,8 @@ title: "Project2McKeonSnyder"
 author: "Owen Snyder"
 date: '2022-07-05'
 output: github_document
+params:
+      dataChannel: "Business"
 ---
 
 Render Function
@@ -94,7 +96,8 @@ library(knitr)
 # Read in Data
 
 ```{r warning=FALSE,message=FALSE}
-newsData <- read_csv("/Users/owensnyder/Desktop/OnlineNewsPopularity.csv")
+setwd("~/Desktop")
+newsData <- read_csv("OnlineNewsPopularity.csv")
 newsData
 ## change path
 ```
@@ -123,6 +126,22 @@ newsData <- newsData %>% mutate(dataChannel =
 #newsData
 
 #summary(newsData)
+```
+
+## Filter Data by Channel
+
+```{r}
+
+newsData.busn <- newsData %>% filter(dataChannel=="Business")
+newsData.ent <- newsData %>% filter(dataChannel=="Entertainment")
+newsData.life <- newsData %>% filter(dataChannel=="Lifestyle")
+newsData.socmed <- newsData %>% filter(dataChannel=="Social Media")
+newsData.tech <- newsData %>% filter(dataChannel=="Tech")
+newsData.wrld <- newsData %>% filter(dataChannel=="World")
+
+
+channel.data <- newsData %>% filter(dataChannel == params$dataChannel)
+
 ```
 
 # Split Data: Train/Test Set
