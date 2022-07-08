@@ -26,7 +26,7 @@ Owen Snyder
     -   [lm Model 2](#lm-model-2)
     -   [Ensemble 1](#ensemble-1)
     -   [Ensemble 2](#ensemble-2)
--   [Model Comparison???](#model-comparison)
+-   [Model Comparison](#model-comparison)
 
 Render Function
 
@@ -179,7 +179,7 @@ newsData
     ## #   self_reference_avg_sharess <dbl>, weekday_is_monday <dbl>, weekday_is_tuesday <dbl>, …
 
 ``` r
-## change path
+## need to change working dir
 ```
 
 # Create New Variables
@@ -278,7 +278,7 @@ newsTrain %>% summarise(avgShares = mean(shares), medianShares = median(shares),
     ## # A tibble: 1 × 3
     ##   avgShares medianShares sdShares
     ##       <dbl>        <dbl>    <dbl>
-    ## 1     3266.         1400   17569.
+    ## 1     3645.         1700    8286.
 
 # Contingency Tables
 
@@ -306,7 +306,7 @@ hist.shares + geom_histogram(bins = 45, fill = "lightblue", colour = 8) +
               ggtitle("Log Transformation of Shares")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ## Plot 5 -
 
@@ -320,16 +320,33 @@ sp1 <- ggplot(data = newsTrain, aes(x = shares, y = num_imgs))
 sp1 + geom_point()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 sp2 <- ggplot(data = newsTrain, aes(x = shares, y = num_hrefs))
 sp2 + geom_point()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-24-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
+
+``` r
+## BOXPLOT NUM IMGS BY DAY!
+```
 
 ## Plot 6 -
+
+Boxplots!
+
+``` r
+bp1 <- ggplot(data = newsTrain, aes(x=dayOfWeek, y=num_imgs, fill=dayOfWeek))
+bp1 + geom_boxplot() + ggtitle("Boxplot: num_imgs per dayOfWeek")
+```
+
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+``` r
+## + geom_jitter() 
+```
 
 # Modeling
 
@@ -368,7 +385,8 @@ lmFit1 <- train(shares ~ n_tokens_title + average_token_length + global_rate_pos
                          global_rate_negative_words + num_imgs + num_videos + num_hrefs,
                 data = newsTrain,
                 method = "lm",
-                trControl = trnCntrl)
+                trControl = trnCntrl,
+                preProcess = c("center", "scale"))
 ##pre process
 
 
@@ -378,11 +396,31 @@ lmFit1.pred <- predict(lmFit1, newdata = newsTest)
 
 ## lm Model 2
 
-Ashlee
+``` r
+## now fit a new linear model for all of the two- way interactions between our chosen predictors
+lmFit2 <- train(shares ~ (n_tokens_title + average_token_length + global_rate_positive_words +
+                         global_rate_negative_words + num_imgs + num_videos + num_hrefs)^2,
+                data = newsTrain,
+                method = "lm",
+                preProcess = c("center", "scale"),
+                trControl = trnCntrl)
+## Now predict on the TEST data!
+lmFit2.pred <- predict(lmFit2, newdata = newsTest)
+```
 
 ## Ensemble 1
 
-Ashlee
+``` r
+rvFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_positive_words +
+                         global_rate_negative_words + num_imgs + num_videos + num_hrefs,
+                  data = newsTrain,
+                  method = "rf",
+                  trControl = NewtrnCntrl,
+                  preProcess = c("center", "scale"),
+                  tuneGrid = data.frame(mtry= 1:7))
+
+rvFit.pred <- predict(rvFit, newdata = newsTest)
+```
 
 ## Ensemble 2
 
@@ -403,6 +441,27 @@ boostFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_p
                   preProcess = c("center", "scale"),
                   tuneGrid = gbmGrid,
                   verbose = FALSE)
+
+boostFitPred <- predict(boostFit, newdata = newsTest)
 ```
 
-# Model Comparison???
+# Model Comparison
+
+There are many different metrics that can be utilized to determine which
+model should be used. For example, popular metrics include MAE, RMSE,
+AIC/BIC, and many more.
+
+This section will be dedicated to comparing our models via the RMSE
+metric only.
+
+We will be using the `predict()` function that we used above after
+fitting each fo the models, along with base R functions like `sqrt()`
+and `mean()` to calculate RMSE by hand.
+
+``` r
+lmFit1.RMSE <- sqrt(mean((lmFit1.pred-newsTest$shares)^2))
+
+lmFit2.RMSE <- sqrt(mean((lmFit2.pred-newsTest$shares)^2))
+
+boostFit.RMSE <- sqrt(mean((boostFitPred-newsTest$shares)^2))
+```

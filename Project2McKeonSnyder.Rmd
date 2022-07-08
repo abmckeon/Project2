@@ -4,7 +4,7 @@ author: "Owen Snyder"
 date: '2022-07-05'
 output: github_document
 params:
-      dataChannel: "Business"
+      dataChannel: "Lifestyle"
 ---
 
 Render Function
@@ -99,7 +99,8 @@ library(knitr)
 setwd("~/Desktop")
 newsData <- read_csv("OnlineNewsPopularity.csv")
 newsData
-## change path
+## need to change working dir
+
 ```
 
 # Create New Variables
@@ -226,10 +227,19 @@ sp1 + geom_point()
 sp2 <- ggplot(data = newsTrain, aes(x = shares, y = num_hrefs))
 sp2 + geom_point()
 
+## BOXPLOT NUM IMGS BY DAY!
 ```
 
 
 ## Plot 6 -
+
+Boxplots!  
+```{r}
+bp1 <- ggplot(data = newsTrain, aes(x=dayOfWeek, y=num_imgs, fill=dayOfWeek))
+bp1 + geom_boxplot() + ggtitle("Boxplot: num_imgs per dayOfWeek")
+## + geom_jitter() 
+```
+
 
 # Modeling
 The main goal of our modeling section is to create predictive models for predicting the number of shares based on our variables of interest. We will be using two linear regression type models and two ensemble tree-based models. Once these models are fit, we will be able to identify the best of the four.  
@@ -261,7 +271,8 @@ lmFit1 <- train(shares ~ n_tokens_title + average_token_length + global_rate_pos
                          global_rate_negative_words + num_imgs + num_videos + num_hrefs,
                 data = newsTrain,
                 method = "lm",
-                trControl = trnCntrl)
+                trControl = trnCntrl,
+                preProcess = c("center", "scale"))
 ##pre process
 
 
@@ -271,13 +282,35 @@ lmFit1.pred <- predict(lmFit1, newdata = newsTest)
 ```
 
 ## lm Model 2
-Ashlee
+
+```{r}
+## now fit a new linear model for all of the two- way interactions between our chosen predictors
+lmFit2 <- train(shares ~ (n_tokens_title + average_token_length + global_rate_positive_words +
+                         global_rate_negative_words + num_imgs + num_videos + num_hrefs)^2,
+                data = newsTrain,
+                method = "lm",
+                preProcess = c("center", "scale"),
+                trControl = trnCntrl)
+## Now predict on the TEST data!
+lmFit2.pred <- predict(lmFit2, newdata = newsTest)
+```
 
 
 
 ## Ensemble 1
 
-Ashlee  
+```{r}
+rvFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_positive_words +
+                         global_rate_negative_words + num_imgs + num_videos + num_hrefs,
+                  data = newsTrain,
+                  method = "rf",
+                  trControl = NewtrnCntrl,
+                  preProcess = c("center", "scale"),
+                  tuneGrid = data.frame(mtry= 1:7))
+
+rvFit.pred <- predict(rvFit, newdata = newsTest)
+
+```
 
 
 ## Ensemble 2
@@ -299,7 +332,7 @@ boostFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_p
                   tuneGrid = gbmGrid,
                   verbose = FALSE)
 
-
+boostFitPred <- predict(boostFit, newdata = newsTest)
 ```
 
 
@@ -307,4 +340,22 @@ boostFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_p
 
 
 
-# Model Comparison???
+# Model Comparison
+
+There are many different metrics that can be utilized to determine which model should be used. For example, popular metrics include MAE, RMSE, AIC/BIC, and many more.  
+
+This section will be dedicated to comparing our models via the RMSE metric only.  
+
+We will be using the `predict()` function that we used above after fitting each fo the models, along with base R functions like `sqrt()` and `mean()` to calculate RMSE by hand.
+
+
+```{r}
+
+lmFit1.RMSE <- sqrt(mean((lmFit1.pred-newsTest$shares)^2))
+
+lmFit2.RMSE <- sqrt(mean((lmFit2.pred-newsTest$shares)^2))
+
+boostFit.RMSE <- sqrt(mean((boostFitPred-newsTest$shares)^2))
+
+```
+
