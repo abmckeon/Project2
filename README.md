@@ -291,9 +291,47 @@ package. (edit the toc headings below)
 
 ## Plot 1 -
 
+We first want to visually examine if shorter titles are more likely to
+be shared compared to longer titles. A scatterplot can easily do this
+for us.
+
+``` r
+scatterplotTitle <- ggplot(newsTrain, aes(x= `n_tokens_title`, y= `shares`)) +
+  geom_point() +
+  labs(title= "N_Tokens_Title  vs. Shares") + 
+  geom_smooth(method = 'lm') +
+  geom_smooth(col = "blue") +
+  geom_text(x = 4000, y = 24, size = 4, label = paste0("Correlation = ", round(correlation, 2)))
+scatterplotTitle
+```
+
 ## Plot 2 -
 
+Then, what if we are interested in visually examining if shorter content
+is more likely to be shared compared to longer content? a Scattererplot
+can also help us with this.
+
+``` r
+scatterplotLength <- ggplot(newsTrain, aes(x= `average_token_length`, y= `shares`)) +
+  geom_point() +
+  labs(title= "Average_Token_Length  vs. Shares") + 
+  geom_smooth(method = 'lm') +
+  geom_smooth(col = "pink") +
+  geom_text(x = 4000, y = 24, size = 4, label = paste0("Correlation = ", round(correlation, 2)))
+scatterplotLength
+```
+
 ## Plot 3 -
+
+We can use a bar graph to determine if business articles published on
+weekdays are shared at higher rates than business articles published on
+weekends.
+
+``` r
+barplotDay <- ggplot(data = newsTrain, aes(x= `dayOfWeek`, y= `shares`))
+barplotDay + geom_bar() + 
+  labs(title= "ADay of Week  vs. Shares")  
+```
 
 ## Plot 4 -
 
@@ -306,7 +344,7 @@ hist.shares + geom_histogram(bins = 45, fill = "lightblue", colour = 8) +
               ggtitle("Log Transformation of Shares")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ## Plot 5 -
 
@@ -320,14 +358,14 @@ sp1 <- ggplot(data = newsTrain, aes(x = shares, y = num_imgs))
 sp1 + geom_point()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
 sp2 <- ggplot(data = newsTrain, aes(x = shares, y = num_hrefs))
 sp2 + geom_point()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-2.png)<!-- -->
 
 ``` r
 ## BOXPLOT NUM IMGS BY DAY!
@@ -342,7 +380,7 @@ bp1 <- ggplot(data = newsTrain, aes(x=dayOfWeek, y=num_imgs, fill=dayOfWeek))
 bp1 + geom_boxplot() + ggtitle("Boxplot: num_imgs per dayOfWeek")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
 ## + geom_jitter() 
@@ -359,16 +397,25 @@ identify the best of the four.
 First, it is important to describe in detail the methods behind each of
 these model types.
 
-**Linear Models** – Ashlee describes …
+**Linear Models** – Linear models are a method for predictive modeling
+that allows for evaluating the linear relationship between a continuous
+outcome variable of interest against one or more predictor variables.
+With linear models you are evaluating one model at a time, and can
+compare that model to other models of interest to determine best fit for
+the data. Linear regression and multiple linear regression are both
+examples of linear models. …
 
-**Ensemble Models** – Ashlee describes …
-
-NOTE: i can also do this part if need be!
+**Ensemble Models** – Ensemble models are a method for taking multiple
+independent and different models and combining those models into one
+stronger model for prediction. This method can produce stronger
+prediction results when compared to linear models due to it’s enhanced
+ability to reduce generalized error. Random forest and Boosting trees
+are both examples of ensemble models. …
 
 ## lm Model 1
 
-Owen **Full Linear Model** using all of our variables of interest.
-explain in more detail.
+**Full Linear Model** using all of our variables of interest. explain in
+more detail.
 
 ``` r
 ## set up trainControl using 5-fold cross validation
@@ -396,6 +443,8 @@ lmFit1.pred <- predict(lmFit1, newdata = newsTest)
 
 ## lm Model 2
 
+\<\<\<\<\<\<\< HEAD
+
 ``` r
 ## now fit a new linear model for all of the two- way interactions between our chosen predictors
 lmFit2 <- train(shares ~ (n_tokens_title + average_token_length + global_rate_positive_words +
@@ -408,7 +457,27 @@ lmFit2 <- train(shares ~ (n_tokens_title + average_token_length + global_rate_po
 lmFit2.pred <- predict(lmFit2, newdata = newsTest)
 ```
 
+======= \>\>\>\>\>\>\> 384aeaeff8431b0baddaae90f8594096b5503ea1
+
+**Multiple Linear Regression Model** using all of our variables of
+interest, plus all interaction combinations of those variables.
+
+``` r
+## now fit a new linear model for all of the two- way interactions between our chosen predictors
+lmFit2 <- train(shares ~ (n_tokens_title + average_token_length + global_rate_positive_words +
+                         global_rate_negative_words + num_imgs + num_videos + num_hrefs)^2,
+                data = newsTrain,
+                method = "lm",
+                preProcess = c("center", "scale"),
+                trControl = trnCntrl)
+
+## Now predict on the TEST data!
+lmFit2.pred <- predict(lmFit2, newdata = newsTest)
+```
+
 ## Ensemble 1
+
+\<\<\<\<\<\<\< HEAD
 
 ``` r
 rvFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_positive_words +
@@ -422,10 +491,24 @@ rvFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_posi
 rvFit.pred <- predict(rvFit, newdata = newsTest)
 ```
 
+======= **Random Forest Model**. This is a random forest model using all
+variables we have selected for analysis as predictors. \>\>\>\>\>\>\>
+384aeaeff8431b0baddaae90f8594096b5503ea1
+
+``` r
+rvFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_positive_words +
+                         global_rate_negative_words + num_imgs + num_videos + num_hrefs,
+                  data = newsTrain,
+                  method = "rf",
+                  trControl = NewtrnCntrl,
+                  preProcess = c("center", "scale"),
+                  tuneGrid = data.frame(mtry= 1:7))
+```
+
 ## Ensemble 2
 
-Owen **Boosted Tree Model**. This is a boosted tree model using all
-variables we have selected for analysis as predictors.
+**Boosted Tree Model**. This is a boosted tree model using all variables
+we have selected for analysis as predictors.
 
 ``` r
 gbmGrid <-  expand.grid(interaction.depth = c(1,2,3,4), 
@@ -444,6 +527,8 @@ boostFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_p
 
 boostFitPred <- predict(boostFit, newdata = newsTest)
 ```
+
+\<\<\<\<\<\<\< HEAD
 
 # Model Comparison
 
