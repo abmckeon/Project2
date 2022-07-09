@@ -1,6 +1,6 @@
 Project2McKeonSnyder
 ================
-Owen Snyder
+Owen Snyder and Ashlee McKeon
 2022-07-05
 
 -   [Introduction](#introduction)
@@ -34,6 +34,7 @@ Render Function
 rmarkdown::render("Project2McKeonSnyder.Rmd",
                   output_format = "github_document",
                   output_file = "README.md",
+                  params = list(dataChannel = "Lifestyle"),
                   output_options = list(
                     html_preview = FALSE, toc = TRUE, toc_depth = 2, toc_float = TRUE)
 )
@@ -344,7 +345,7 @@ hist.shares + geom_histogram(bins = 45, fill = "lightblue", colour = 8) +
               ggtitle("Log Transformation of Shares")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
 
 ## Plot 5 -
 
@@ -358,14 +359,14 @@ sp1 <- ggplot(data = newsTrain, aes(x = shares, y = num_imgs))
 sp1 + geom_point()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
 
 ``` r
 sp2 <- ggplot(data = newsTrain, aes(x = shares, y = num_hrefs))
 sp2 + geom_point()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-13-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-36-2.png)<!-- -->
 
 ``` r
 ## BOXPLOT NUM IMGS BY DAY!
@@ -380,7 +381,7 @@ bp1 <- ggplot(data = newsTrain, aes(x=dayOfWeek, y=num_imgs, fill=dayOfWeek))
 bp1 + geom_boxplot() + ggtitle("Boxplot: num_imgs per dayOfWeek")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
 
 ``` r
 ## + geom_jitter() 
@@ -443,8 +444,6 @@ lmFit1.pred <- predict(lmFit1, newdata = newsTest)
 
 ## lm Model 2
 
-\<\<\<\<\<\<\< HEAD
-
 ``` r
 ## now fit a new linear model for all of the two- way interactions between our chosen predictors
 lmFit2 <- train(shares ~ (n_tokens_title + average_token_length + global_rate_positive_words +
@@ -456,8 +455,6 @@ lmFit2 <- train(shares ~ (n_tokens_title + average_token_length + global_rate_po
 ## Now predict on the TEST data!
 lmFit2.pred <- predict(lmFit2, newdata = newsTest)
 ```
-
-======= \>\>\>\>\>\>\> 384aeaeff8431b0baddaae90f8594096b5503ea1
 
 **Multiple Linear Regression Model** using all of our variables of
 interest, plus all interaction combinations of those variables.
@@ -477,8 +474,6 @@ lmFit2.pred <- predict(lmFit2, newdata = newsTest)
 
 ## Ensemble 1
 
-\<\<\<\<\<\<\< HEAD
-
 ``` r
 rvFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_positive_words +
                          global_rate_negative_words + num_imgs + num_videos + num_hrefs,
@@ -491,18 +486,19 @@ rvFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_posi
 rvFit.pred <- predict(rvFit, newdata = newsTest)
 ```
 
-======= **Random Forest Model**. This is a random forest model using all
-variables we have selected for analysis as predictors. \>\>\>\>\>\>\>
-384aeaeff8431b0baddaae90f8594096b5503ea1
+**Random Forest Model**. This is a random forest model using all
+variables we have selected for analysis as predictors.
 
 ``` r
-rvFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_positive_words +
+rfFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_positive_words +
                          global_rate_negative_words + num_imgs + num_videos + num_hrefs,
                   data = newsTrain,
                   method = "rf",
                   trControl = NewtrnCntrl,
                   preProcess = c("center", "scale"),
                   tuneGrid = data.frame(mtry= 1:7))
+
+rfFit.pred <- predict(rfFit, newdata = newsTest)
 ```
 
 ## Ensemble 2
@@ -528,8 +524,6 @@ boostFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_p
 boostFitPred <- predict(boostFit, newdata = newsTest)
 ```
 
-\<\<\<\<\<\<\< HEAD
-
 # Model Comparison
 
 There are many different metrics that can be utilized to determine which
@@ -544,9 +538,44 @@ fitting each fo the models, along with base R functions like `sqrt()`
 and `mean()` to calculate RMSE by hand.
 
 ``` r
+## Find RMSE for linear model fit 1
 lmFit1.RMSE <- sqrt(mean((lmFit1.pred-newsTest$shares)^2))
 
+## Find RMSE for linear model fit 2
 lmFit2.RMSE <- sqrt(mean((lmFit2.pred-newsTest$shares)^2))
 
+## Find RMSE for random forest model
+rfFit.RMSE <- sqrt(mean((rfFit.pred-newsTest$shares)^2))
+
+## Find RMSE for boosted tree model 
 boostFit.RMSE <- sqrt(mean((boostFitPred-newsTest$shares)^2))
 ```
+
+Now we can create a table of all of the RMSE values to get a better
+visual of how these values differ among model fits.
+
+``` r
+## create data frame of all RMSE values 
+all.RMSE <- data.frame(lmFit1.RMSE,lmFit2.RMSE,rfFit.RMSE,boostFit.RMSE)
+colnames(all.RMSE) <- c("Linear Reg #1", "Linear Reg #2", "Random Forest", "Boosted Tree")
+all.RMSE
+```
+
+    ##   Linear Reg #1 Linear Reg #2 Random Forest Boosted Tree
+    ## 1       10145.6      10680.27       10197.4     10240.81
+
+``` r
+## use which.min to find the element in the data frame with the lowest RMSE
+minRMSE <- which.min(all.RMSE)
+minRMSE
+```
+
+    ## Linear Reg #1 
+    ##             1
+
+``` r
+## now automate 
+paste0("The model with the lowest RMSE value is the ", colnames(all.RMSE)[minRMSE] , " model")
+```
+
+    ## [1] "The model with the lowest RMSE value is the Linear Reg #1 model"
