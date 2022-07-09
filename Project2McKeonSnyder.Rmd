@@ -19,22 +19,6 @@ rmarkdown::render("Project2McKeonSnyder.Rmd",
 
 ```
 
-```{r channel automation}
-channel <- c("Business", "Entertainment", "Lifestyle", "Social Media", "Tech", "World", "Other")
-
-output_file = pasteo0(channel, ".md")
-
-params <- lapply(channel, FUN= function(x){list(channel=x)})
-
-reports <- tibble(output_file, params)
-
-apply(reports, margin =1,FUN=function(x)  
-  {rmarkdown::render("Project2McKeonSnyder.Rmd",
-                     output_format = "github_document",
-                     output_file = x[[1]],
-                     params = list[[2]])})
-```
-
 
 # Introduction
 This is a full report of Project 2 conducted by Ashlee McKeon and Owen Snyder.
@@ -106,6 +90,22 @@ library(caret)
 library(rmarkdown)
 library(knitr)
 
+```
+
+```{r channel automation}
+channel <- c("Business", "Entertainment", "Lifestyle", "Social Media", "Tech", "World", "Other")
+
+output_file = paste0(channel, ".md")
+
+params <- lapply(channel, FUN= function(x){list(channel=x)})
+
+reports <- tibble(output_file, params)
+
+apply(reports, margin =1,FUN=function(x)  
+  {rmarkdown::render("Project2McKeonSnyder.Rmd",
+                     output_format = "github_document",
+                     output_file = x[[1]],
+                     params = list[[2]])})
 ```
 
 # Read in Data
