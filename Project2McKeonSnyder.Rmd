@@ -19,6 +19,22 @@ rmarkdown::render("Project2McKeonSnyder.Rmd",
 
 ```
 
+```{r channel automation}
+channel <- c("Business", "Entertainment", "Lifestyle", "Social Media", "Tech", "World", "Other")
+
+output_file = pasteo0(channel, ".md")
+
+params <- lapply(channel, FUN= function(x){list(channel=x)})
+
+reports <- tibble(output_file, params)
+
+apply(reports, margin =1,FUN=function(x)  
+  {rmarkdown::render("Project2McKeonSnyder.Rmd",
+                     output_format = "github_document",
+                     output_file = x[[1]],
+                     params = list[[2]])})
+```
+
 
 # Introduction
 This is a full report of Project 2 conducted by Ashlee McKeon and Owen Snyder.
@@ -92,8 +108,6 @@ library(knitr)
 
 ```
 
-
-
 # Read in Data
 
 ```{r warning=FALSE,message=FALSE}
@@ -124,7 +138,15 @@ newsData <- newsData %>% mutate(dataChannel =
                                ifelse(weekday_is_thursday==1, "Thursday",
                                ifelse(weekday_is_friday==1, "Friday",
                                ifelse(weekday_is_saturday==1, "Saturday",
-                               ifelse(weekday_is_sunday==1, "Sunday", "NULL"))))))))
+                               ifelse(weekday_is_sunday==1, "Sunday", "NULL")))))))) %>%
+                      mutate(weekdayWeekend = 
+                               ifelse(weekday_is_monday==1, "Weekday",
+                               ifelse(weekday_is_tuesday==1, "Weekday",
+                               ifelse(weekday_is_wednesday==1, "Weekday",
+                               ifelse(weekday_is_thursday==1, "Weekday",
+                               ifelse(weekday_is_friday==1, "Weekday",
+                               ifelse(weekday_is_saturday==1, "Weekend",
+                               ifelse(weekday_is_sunday==1, "Weekend", "NULL"))))))))
 
 ## upon inspection, there are NA values present, this could be due to some articles not having
 ## one of these specific categories
@@ -141,7 +163,6 @@ newsData <- newsData %>% mutate(dataChannel =
 ## Filter Data by Channel
 
 ```{r}
-
 newsData.busn <- newsData %>% filter(dataChannel=="Business")
 newsData.ent <- newsData %>% filter(dataChannel=="Entertainment")
 newsData.life <- newsData %>% filter(dataChannel=="Lifestyle")
@@ -186,12 +207,25 @@ newsTrain %>% summarise(avgShares = mean(shares), medianShares = median(shares),
 
 ```
 
-
-
-
 # Contingency Tables
 
-Ashlee
+First, we may want to look at the frequency of all data channels in the newsData dataset. 
+
+``` {r}
+oneWayDataChannel <- table(newsData$dataChannel)
+oneWayDataChannel 
+```
+
+We can see from the table that Tech and World are the most common, while Lifestyle and Social Media are the least common. This may suggest something meaningful exists here to look into more. 
+
+Considering different data channels may be published more commonly on specific days of the week (e.g., business articles potentially having a higher publication frequency Monday through Friday compared to Saturday through Sunday). A two-way contingency table can be run to see if that theory holds up at the summary level of analysis. 
+
+``` {r}
+twoWayChannelDays <- table(newsData$dataChannel, newsData$dayOfWeek) 
+twoWayChannelDays
+```
+
+It does appear from the table that publication frequency is much higher Monday through Friday compared to Saturday through Sunday, and that this pattern is stable across all data channels. 
 
 # Plots
 
@@ -199,40 +233,47 @@ This section is dedicated to visualization by means of the `ggplot2` package.
 (edit the toc headings below)  
 
 ## Plot 1 -
-We first want to visually examine if shorter titles are more likely to be shared compared to longer titles. A scatterplot can easily do this for us. 
 
-```{r eval=FALSE}
+We first want to visually examine if there is relationship between title length and the amount of times an article is shared. 
+
+```{r}
+correlation1 <- cor(newsData$n_tokens_title, newsData$shares)
+
 scatterplotTitle <- ggplot(newsTrain, aes(x= `n_tokens_title`, y= `shares`)) +
   geom_point() +
   labs(title= "N_Tokens_Title  vs. Shares") + 
   geom_smooth(method = 'lm') +
   geom_smooth(col = "blue") +
-  geom_text(x = 4000, y = 24, size = 4, label = paste0("Correlation = ", round(correlation, 2)))
-scatterplotTitle
+  geom_text(x = 12, y = 175000, size = 4, label = paste0("Correlation = ", round(correlation1, 2)))
 ```
 
-## Plot 2 -
-Then, what if we are interested in visually examining if shorter content is more likely to be shared compared to longer content? a Scattererplot can also help us with this. 
+We can see from the scatterplot that there does not seem to be a linear relationship between title length and the amount of times an article is shared, as evidenced by the extremely weak correlation of 0.01. 
 
-```{r eval =FALSE}
+## Plot 2 -
+What if now we are interested in determining if there is relationship between content length and the amount of times an article is shared. 
+
+```{r}
+correlation2 <- cor(newsData$average_token_length, newsData$shares)
+
 scatterplotLength <- ggplot(newsTrain, aes(x= `average_token_length`, y= `shares`)) +
   geom_point() +
   labs(title= "Average_Token_Length  vs. Shares") + 
   geom_smooth(method = 'lm') +
   geom_smooth(col = "pink") +
-  geom_text(x = 4000, y = 24, size = 4, label = paste0("Correlation = ", round(correlation, 2)))
-scatterplotLength
+  geom_text(x = 2, y = 175000, size = 4, label = paste0("Correlation = ", round(correlation2, 2)))
 ```
+
+The scatterplot shows that similar to the previous analysis using title length and shares, there does not seem to be a linear relationship between content length and the amount of times an article is shared, as evidenced by the extremely weak correlation of -0.02. 
 
 ## Plot 3 -
-We can use a bar graph to determine if business articles published on weekdays are shared at higher rates than business articles published on weekends.
+We can use a bar graph to determine if any data channels are published more on weekdays then on weekends.
 
-```{r eval=FALSE}
-barplotDay <- ggplot(data = newsTrain, aes(x= `dayOfWeek`, y= `shares`))
+```{r}
+barplotDay <- ggplot(data = newsTrain, aes(y= `weekdayWeekend`, fill = weekdayWeekend))
 barplotDay + geom_bar() + 
-  labs(title= "ADay of Week  vs. Shares")  
-
+  labs(title= "Publication on Weekday vs. Weekend")
 ```
+We can see from the plot that there is a very apparent difference between  the number of articles published on weekdays vs. weekends, with articles published on weekdays being much higher. 
 
 ## Plot 4 -
 This is a histogram of the shares variable. We wanted to get a better idea of how this response variable is distributed.  
@@ -244,8 +285,6 @@ hist.shares + geom_histogram(bins = 45, fill = "lightblue", colour = 8) +
 
 
 ```
-
-
 
 ## Plot 5 -
 
@@ -283,7 +322,8 @@ First, it is important to describe in detail the methods behind each of these mo
 **Ensemble Models** -- Ensemble models are a method for taking multiple independent and different models and combining those models into one stronger model for prediction. This method can produce stronger prediction results when compared to linear models due to it's enhanced ability to reduce generalized error. Random forest and Boosting trees are both examples of ensemble models. 
  ...
 
-## lm Model 1
+## lm Model 1 -
+
 **Full Linear Model** using all of our variables of interest. explain in more detail.
 
 ```{r}
@@ -310,11 +350,11 @@ lmFit1.pred <- predict(lmFit1, newdata = newsTest)
 
 ```
 
-## lm Model 2
+## lm Model 2 -
 
+**Linear Model** using all of the two- way interactions between our chosen predictors
 
 ```{r}
-## now fit a new linear model for all of the two- way interactions between our chosen predictors
 lmFit2 <- train(shares ~ (n_tokens_title + average_token_length + global_rate_positive_words +
                          global_rate_negative_words + num_imgs + num_videos + num_hrefs)^2,
                 data = newsTrain,
@@ -325,41 +365,9 @@ lmFit2 <- train(shares ~ (n_tokens_title + average_token_length + global_rate_po
 lmFit2.pred <- predict(lmFit2, newdata = newsTest)
 ```
 
-
-**Multiple Linear Regression Model** using all of our variables of interest, plus all interaction combinations of those variables. 
-
-```{r}
-## now fit a new linear model for all of the two- way interactions between our chosen predictors
-lmFit2 <- train(shares ~ (n_tokens_title + average_token_length + global_rate_positive_words +
-                         global_rate_negative_words + num_imgs + num_videos + num_hrefs)^2,
-                data = newsTrain,
-                method = "lm",
-                preProcess = c("center", "scale"),
-                trControl = trnCntrl)
-
-## Now predict on the TEST data!
-lmFit2.pred <- predict(lmFit2, newdata = newsTest)
-
-```
-
-## Ensemble 1
-
-
-```{r}
-rvFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_positive_words +
-                         global_rate_negative_words + num_imgs + num_videos + num_hrefs,
-                  data = newsTrain,
-                  method = "rf",
-                  trControl = NewtrnCntrl,
-                  preProcess = c("center", "scale"),
-                  tuneGrid = data.frame(mtry= 1:7))
-
-rvFit.pred <- predict(rvFit, newdata = newsTest)
-
-```
+## Ensemble 1 -
 
 **Random Forest Model**. This is a random forest model using all variables we have selected for analysis as predictors.
-
 
 ```{r}
 rfFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_positive_words +
@@ -373,7 +381,7 @@ rfFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_posi
 rfFit.pred <- predict(rfFit, newdata = newsTest)
 ```
 
-## Ensemble 2
+## Ensemble 2 -
   
 **Boosted Tree Model**. This is a boosted tree model using all variables we have selected for analysis as predictors.
 
@@ -394,11 +402,6 @@ boostFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_p
 
 boostFitPred <- predict(boostFit, newdata = newsTest)
 ```
-
-
-
-
-
 
 # Model Comparison
 
