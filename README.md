@@ -371,7 +371,7 @@ scatterplotTitle
 
     ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 
-![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ## Plot 2 - Scatterplot
 
@@ -394,7 +394,7 @@ scatterplotLength
 
     ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 
-![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ## Plot 3 - Barplot
 
@@ -407,7 +407,7 @@ barplotDay + geom_bar() +
   labs(title= "Publication on Weekday vs. Weekend")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 We can see from the plot that there is a very apparent difference
 between the number of articles published on weekdays vs. weekends, with
@@ -428,7 +428,7 @@ hist.shares + geom_histogram(bins = 45, fill = "lightblue", colour = 8) +
               ggtitle("Log Transformation of Shares")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ## Plot 5 - Scatterplot
 
@@ -451,7 +451,7 @@ sp1 + geom_point() + geom_smooth(method = "lm", col = "purple") +
 
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ## Plot 6 - Boxplot
 
@@ -466,7 +466,7 @@ bp1 <- ggplot(data = newsTrain, aes(x=dayOfWeek, y=num_imgs, fill=dayOfWeek))
 bp1 + geom_boxplot() + ggtitle("Boxplot: Number of Images per Day of Week")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 # Modeling
 
