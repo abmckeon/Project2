@@ -237,10 +237,12 @@ scatterplotTitle <- ggplot(newsTrain, aes(x= `n_tokens_title`, y= `shares`)) +
   geom_smooth(method = 'lm') +
   geom_smooth(col = "blue") +
   geom_text(x = 12, y = 175000, size = 4, label = paste0("Correlation = ", round(correlation1, 2)))
+<<<<<<< HEAD
 scatterplotTitle
+=======
+scatterplotTitle 
+>>>>>>> c7969f46ac9a647cfa5fbb09a80e46aa053b55af
 ```
-
-We can see from the scatterplot that there does not seem to be a linear relationship between title length and the amount of times an article is shared, as evidenced by the extremely weak correlation of 0.01. 
 
 ## Plot 2 - Scatterplot
 What if now we are interested in determining if there is relationship between content length and the amount of times an article is shared. 
@@ -257,7 +259,6 @@ scatterplotLength <- ggplot(newsTrain, aes(x= `average_token_length`, y= `shares
 scatterplotLength
 ```
 
-The scatterplot shows that similar to the previous analysis using title length and shares, there does not seem to be a linear relationship between content length and the amount of times an article is shared, as evidenced by the extremely weak correlation of -0.02. 
 
 ## Plot 3 - Barplot
 We can use a bar graph to determine if any data channels are published more on weekdays than on weekends.
@@ -267,7 +268,10 @@ barplotDay <- ggplot(data = newsTrain, aes(y= `weekdayWeekend`, fill = weekdayWe
 barplotDay + geom_bar() + 
   labs(title= "Publication on Weekday vs. Weekend")
 ```
+<<<<<<< HEAD
 We can see from the plot that there is a very apparent difference between the number of articles published on weekdays vs. weekends, with articles published on weekdays being much higher. 
+=======
+>>>>>>> c7969f46ac9a647cfa5fbb09a80e46aa053b55af
 
 ## Plot 4 - Histogram
 
