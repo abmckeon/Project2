@@ -3,12 +3,40 @@ Project2McKeonSnyder
 Owen Snyder and Ashlee McKeon
 2022-07-05
 
+-   [Introduction](#introduction)
+    -   [Our Goal and Purpose](#our-goal-and-purpose)
+    -   [Variable Selection](#variable-selection)
+    -   [Methods](#methods)
+    -   [Packages](#packages)
+    -   [Automation Code](#automation-code)
+-   [Read in Data](#read-in-data)
+-   [Create New Variables](#create-new-variables)
+    -   [Filter Data by Channel](#filter-data-by-channel)
+-   [Split Data: Train/Test Set](#split-data-traintest-set)
+-   [Numerical Summaries](#numerical-summaries)
+-   [Contingency Tables](#contingency-tables)
+-   [Plots](#plots)
+    -   [Plot 1 - Scatterplot](#plot-1---scatterplot)
+    -   [Plot 2 - Scatterplot](#plot-2---scatterplot)
+    -   [Plot 3 - Barplot](#plot-3---barplot)
+    -   [Plot 4 - Histogram](#plot-4---histogram)
+    -   [Plot 5 - Scatterplot](#plot-5---scatterplot)
+    -   [Plot 6 - Boxplot](#plot-6---boxplot)
+-   [Modeling](#modeling)
+    -   [Linear Model 1 - Full Linear
+        Model](#linear-model-1---full-linear-model)
+    -   [Linear Model 2 - Polynomial
+        Regression](#linear-model-2---polynomial-regression)
+    -   [Ensemble 1 - Random Forest](#ensemble-1---random-forest)
+    -   [Ensemble 2 - Boosted Tree](#ensemble-2---boosted-tree)
+-   [Model Comparison](#model-comparison)
+
 Render Function
 
 ``` r
 rmarkdown::render("Project2McKeonSnyder.Rmd",
                   output_format = "github_document",
-                  output_file = "README.md",
+                  output_file = "READmeFinal.md",
                   params = list(dataChannel = "Lifestyle"),
                   output_options = list(
                     html_preview = FALSE, toc = TRUE, toc_depth = 2, toc_float = TRUE)
@@ -30,8 +58,12 @@ The data includes about two years worth of information regarding
 and quantitative variables that will eventually help us predict the
 number of shares a *Mashable* article gets. We will only use a subset of
 these variables to help predict the shares variable using a variety of
-predictive models such as Random Forrest and Boosted Tree models. A main
-variable of interest will be the…
+predictive models such as Linear models, a Random Forest, and a Boosted
+Tree model. Before the models are fitted, we will split the data into a
+training and test set (70/30 split) and there will be an exploratory
+data analysis conducted. Once the models are fitted, we will use the
+RMSE metric to determine which model has the lowest RMSE and thus
+declared the winner for that data channel.
 
 ## Variable Selection
 
@@ -84,7 +116,7 @@ also be described below as it arises.
 ## Methods
 
 Before we get started, it is important to briefly describe the methods
-wee used for analysis.
+we used for analysis.
 
 -   We will first read in the data set and manipulate the necessary
     variables.
@@ -128,17 +160,15 @@ library(knitr)
 ## Automation Code
 
 ``` r
-## just eval=FALSE-ing this so i can commit and check github pages
+## create dataChannel object to store all channels
 dataChannel <- c("Business", "Entertainment", "Lifestyle", "Social Media", "Tech", "World")
-
+## use lapply()
 params <- lapply(dataChannel, FUN= function(x){list(dataChannel=x)})
-
+## create output file names
 output_file <-  paste0(dataChannel, ".md")
-
-#params <- lapply(channel, FUN= function(x){list(channel=x)})
-
+## put into a tibble
 reports <- tibble(output_file, params)
-
+## now apply to all
 apply(reports, MARGIN = 1,
       FUN=function(x){  
   rmarkdown::render("Project2McKeonSnyder.Rmd",
@@ -153,7 +183,6 @@ apply(reports, MARGIN = 1,
 setwd("~/Desktop")
 newsData <- read_csv("OnlineNewsPopularity.csv")
 newsData
-## need to change working dir
 ```
 
 # Create New Variables
@@ -313,10 +342,6 @@ scatterplotTitle <- ggplot(newsTrain, aes(x= `n_tokens_title`, y= `shares`)) +
 scatterplotTitle
 ```
 
-    ## `geom_smooth()` using formula 'y ~ x'
-
-    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
-
 ![](World_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ## Plot 2 - Scatterplot
@@ -335,10 +360,6 @@ scatterplotLength <- ggplot(newsTrain, aes(x= `average_token_length`, y= `shares
   geom_text(x = 2, y = 175000, size = 4, label = paste0("Correlation = ", round(correlation2, 2)))
 scatterplotLength
 ```
-
-    ## `geom_smooth()` using formula 'y ~ x'
-
-    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 
 ![](World_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
@@ -392,10 +413,8 @@ correlation3 <- cor(newsTrain$num_hrefs, newsTrain$shares)
 sp1 <- ggplot(data = newsTrain, aes(x = num_hrefs, y = shares))
 sp1 + geom_point() + geom_smooth(method = "lm", col = "purple") +
   ggtitle("Number of Links vs. Shares") +
-  geom_text(x = 70, y = 150000, size = 5, label = paste0("Corr = ", round(correlation3,2)))
+  geom_text(x = 70, y = 120000, size = 5, label = paste0("Corr = ", round(correlation3,2)))
 ```
-
-    ## `geom_smooth()` using formula 'y ~ x'
 
 ![](World_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
@@ -406,6 +425,8 @@ of the week. These plots will give us a better representation of how our
 data is distributed per each day of the week. One should take note of
 any outliers and/or skewness that is present and be able to identify the
 median.
+
+NOTE! Outliers may heavily influence these boxplots.
 
 ``` r
 bp1 <- ggplot(data = newsTrain, aes(x=dayOfWeek, y=num_imgs, fill=dayOfWeek))
@@ -438,7 +459,7 @@ independent and different models and combining those models into one
 stronger model for prediction. This method can produce stronger
 prediction results when compared to linear models due to it’s enhanced
 ability to reduce generalized error. Random Forest and Boosted Trees are
-both examples of ensemble models. …
+both examples of ensemble models.
 
 ## Linear Model 1 - Full Linear Model
 
