@@ -4,6 +4,7 @@ Owen Snyder
 2022-07-10
 
 -   [Description of Repo](#description-of-repo)
+-   [Packages](#packages)
 -   [Render Function](#render-function)
 -   [Automation Code](#automation-code)
 -   [Outputs of Analysis](#outputs-of-analysis)
@@ -23,6 +24,21 @@ data analysis conducted. Once the models are fitted, we will use the
 RMSE metric to determine which model has the lowest RMSE and thus
 declared the winner for that data channel. A more in-depth description
 of variables, models, etc. can be found by visiting each link below.
+
+## Packages
+
+Below is a list of necessary packages that will aid our data analysis
+and modeling.
+
+-   `tidyverse` is a collection of useful packages designed for data
+    science.
+-   `ggplot2` is an amazing way to create visually pleasing and
+    informative graphics.
+-   `caret` is a set of functions that streamline the process of
+    implementing machine learning methods.
+-   `rmarkdown` is a useful package for creating R Markdown documents in
+    a variety of formats.
+-   `knitr` is a useful package to integrate computing and reporting.
 
 ## Render Function
 
@@ -61,4 +77,5 @@ apply(reports, MARGIN = 1,
 The analysis for [Business articles is available
 here](https://github.com/abmckeon/Project2McKeonSnyder/blob/main/Business.html).  
 The analysis for [Entertainment articles is available
-here](https://github.com/abmckeon/Project2McKeonSnyder/blob/main/Entertainment.html)
+here](https://github.com/abmckeon/Project2McKeonSnyder/blob/main/Entertainment.html)  
+The analysis for [Lifestyle articles is available here](Lifestyle.html)
