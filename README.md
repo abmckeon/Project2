@@ -15,17 +15,19 @@ Owen Snyder and Ashlee McKeon
 -   [Numerical Summaries](#numerical-summaries)
 -   [Contingency Tables](#contingency-tables)
 -   [Plots](#plots)
-    -   [Plot 1 - Scstterplot](#plot-1---scstterplot)
+    -   [Plot 1 - Scatterplot](#plot-1---scatterplot)
     -   [Plot 2 - Scatterplot](#plot-2---scatterplot)
     -   [Plot 3 - Barplot](#plot-3---barplot)
     -   [Plot 4 - Histogram](#plot-4---histogram)
     -   [Plot 5 - Scatterplot](#plot-5---scatterplot)
     -   [Plot 6 - Boxplot](#plot-6---boxplot)
 -   [Modeling](#modeling)
-    -   [lm Model 1 -](#lm-model-1--)
-    -   [lm Model 2 -](#lm-model-2--)
-    -   [Ensemble 1 -](#ensemble-1--)
-    -   [Ensemble 2 -](#ensemble-2--)
+    -   [Linear Model 1 - Full Linear
+        Model](#linear-model-1---full-linear-model)
+    -   [Linear Model 2 - Polynomial
+        Regression](#linear-model-2---polynomial-regression)
+    -   [Ensemble 1 - Random Forest](#ensemble-1---random-forest)
+    -   [Ensemble 2 - Boosted Tree](#ensemble-2---boosted-tree)
 -   [Model Comparison](#model-comparison)
 
 Render Function
@@ -152,19 +154,22 @@ library(knitr)
 
 ``` r
 ## just eval=FALSE-ing this so i can commit and check github pages
-channel <- c("Business", "Entertainment", "Lifestyle", "Social Media", "Tech", "World", "Other")
+dataChannel <- c("Business", "Entertainment", "Lifestyle", "Social Media", "Tech", "World")
 
-output_file = paste0(channel, ".md")
+params <- lapply(dataChannel, FUN= function(x){list(dataChannel=x)})
 
-params <- lapply(channel, FUN= function(x){list(channel=x)})
+output_file <-  paste0(dataChannel, ".md")
+
+#params <- lapply(channel, FUN= function(x){list(channel=x)})
 
 reports <- tibble(output_file, params)
 
-apply(reports, MARGIN = 1,FUN=function(x)  
-  {rmarkdown::render("Project2McKeonSnyder.Rmd",
+apply(reports, MARGIN = 1,
+      FUN=function(x){  
+  rmarkdown::render("Project2McKeonSnyder.Rmd",
                      output_format = "github_document",
                      output_file = x[[1]],
-                     params = list[[2]])})
+                     params = x[[2]])})
 ```
 
 # Read in Data
@@ -208,8 +213,7 @@ into one column. That way, we will be working with one single channel
 variable that takes on unique values of Lifestyle, Entertainment,
 Business, Social Media, Tech, and World. This will make automation and
 analysis more clear. Note that the original data tells us that a data
-for either channel is 1 or 0. meaning that 1 means “yes” and 0 means
-“no”.
+for either channel is 1 or 0.
 
 ``` r
 ## use mutate() to create a new channel variable
@@ -237,19 +241,15 @@ newsData <- newsData %>% mutate(dataChannel =
                                ifelse(weekday_is_saturday==1, "Weekend",
                                ifelse(weekday_is_sunday==1, "Weekend", "NULL"))))))))
 
-## upon inspection, there are NA values present, this could be due to some articles not having
-## one of these specific categories
-
-#factor(newsData$dataChannel)
-
-## convert to a factor for analysis??
-
-#newsData
-
-#summary(newsData)
+## Upo inspection, there are NA values present, this could be due to some articles not having
+## one of these specific categories. Thus, we set all NA values for dataChannel to be "Other".
+## However, "Other" will not be analyzed.
 ```
 
 ## Filter Data by Channel
+
+Here, we can filter the data by each specfic data channel. This will
+become helpful upon automation.
 
 ``` r
 newsData.busn <- newsData %>% filter(dataChannel=="Business")
@@ -259,30 +259,25 @@ newsData.socmed <- newsData %>% filter(dataChannel=="Social Media")
 newsData.tech <- newsData %>% filter(dataChannel=="Tech")
 newsData.wrld <- newsData %>% filter(dataChannel=="World")
 
-
+## create new data set for use via automating different reports.
+## note the params$dataChannel argument
 channel.data <- newsData %>% filter(dataChannel == params$dataChannel)
 ```
 
 # Split Data: Train/Test Set
 
-In this section we will split our newsData into a training and test set.
-The training set will be used for model fitting and EDA while the test
-set will be used for predictions (verify). This will be a 70/30 split.
-
-NOTE: this will have to be re-ran due to the addition of the dayOfWeek
-variable. process will be the same but will to re-run all data chunks.
-
-NOTE: NEED TO REMOVE VARIABLES!! i.e the variables that are based on new
-variables need to be deleted from data set.
+In this section we will split our `channel.data` into a training and
+test set. The training set will be used for model fitting and EDA while
+the test set will be used for predictions/model comparisons. This will
+be a 70/30 split.
 
 ``` r
 set.seed(558) ## set seed for reproducibility
-#trainIndex <- createDataPartition(newsData$shares, p = 0.70, list = FALSE)
-#newsTrain <- newsData[trainIndex, ]
-#newsTest <- newsData[-trainIndex, ]
-
+## set train index
 trainIndex <- createDataPartition(channel.data$shares, p = 0.70, list = FALSE)
+## training data
 newsTrain <- channel.data[trainIndex, ]
+## test data
 newsTest <- channel.data[-trainIndex, ]
 ```
 
@@ -308,7 +303,7 @@ newsTrain %>% summarise(avgShares = mean(shares), medianShares = median(shares),
 
 # Contingency Tables
 
-First, we may want to look at the frequency of all data channels in the
+Next, we may want to look at the frequency of all data channels in the
 newsData dataset.
 
 ``` r
@@ -352,9 +347,10 @@ pattern is stable across all data channels.
 # Plots
 
 This section is dedicated to visualization by means of the `ggplot2`
-package. (edit the toc headings below)
+package. We will be analyzing how the shares variables interacts with
+various predictor variables via plots.
 
-## Plot 1 - Scstterplot
+## Plot 1 - Scatterplot
 
 We first want to visually examine if there is relationship between title
 length and the amount of times an article is shared.
@@ -368,7 +364,14 @@ scatterplotTitle <- ggplot(newsTrain, aes(x= `n_tokens_title`, y= `shares`)) +
   geom_smooth(method = 'lm') +
   geom_smooth(col = "blue") +
   geom_text(x = 12, y = 175000, size = 4, label = paste0("Correlation = ", round(correlation1, 2)))
+scatterplotTitle
 ```
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
 
 We can see from the scatterplot that there does not seem to be a linear
 relationship between title length and the amount of times an article is
@@ -388,7 +391,14 @@ scatterplotLength <- ggplot(newsTrain, aes(x= `average_token_length`, y= `shares
   geom_smooth(method = 'lm') +
   geom_smooth(col = "pink") +
   geom_text(x = 2, y = 175000, size = 4, label = paste0("Correlation = ", round(correlation2, 2)))
+scatterplotLength
 ```
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+![](README_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
 
 The scatterplot shows that similar to the previous analysis using title
 length and shares, there does not seem to be a linear relationship
@@ -398,7 +408,7 @@ evidenced by the extremely weak correlation of -0.02.
 ## Plot 3 - Barplot
 
 We can use a bar graph to determine if any data channels are published
-more on weekdays then on weekends.
+more on weekdays than on weekends.
 
 ``` r
 barplotDay <- ggplot(data = newsTrain, aes(y= `weekdayWeekend`, fill = weekdayWeekend))
@@ -406,7 +416,7 @@ barplotDay + geom_bar() +
   labs(title= "Publication on Weekday vs. Weekend")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-73-1.png)<!-- --> We can see
+![](README_files/figure-gfm/unnamed-chunk-32-1.png)<!-- --> We can see
 from the plot that there is a very apparent difference between the
 number of articles published on weekdays vs. weekends, with articles
 published on weekdays being much higher.
@@ -426,7 +436,7 @@ hist.shares + geom_histogram(bins = 45, fill = "lightblue", colour = 8) +
               ggtitle("Log Transformation of Shares")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-74-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
 
 ## Plot 5 - Scatterplot
 
@@ -449,12 +459,12 @@ sp1 + geom_point() + geom_smooth(method = "lm", col = "purple") +
 
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](README_files/figure-gfm/unnamed-chunk-75-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
 
 ## Plot 6 - Boxplot
 
 Below is a boxplot that assesses the number of images based on each day
-of the week. These plots will give us a better resprentation of how our
+of the week. These plots will give us a better representation of how our
 data is distributed per each day of the week. One should take note of
 any outliers and/or skewness that is present and be able to identify the
 median.
@@ -464,7 +474,7 @@ bp1 <- ggplot(data = newsTrain, aes(x=dayOfWeek, y=num_imgs, fill=dayOfWeek))
 bp1 + geom_boxplot() + ggtitle("Boxplot: Number of Images per Day of Week")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-76-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
 
 # Modeling
 
@@ -483,19 +493,19 @@ outcome variable of interest against one or more predictor variables.
 With linear models you are evaluating one model at a time, and can
 compare that model to other models of interest to determine best fit for
 the data. Linear regression and multiple linear regression are both
-examples of linear models. …
+examples of linear models.
 
 **Ensemble Models** – Ensemble models are a method for taking multiple
 independent and different models and combining those models into one
 stronger model for prediction. This method can produce stronger
 prediction results when compared to linear models due to it’s enhanced
-ability to reduce generalized error. Random forest and Boosting trees
-are both examples of ensemble models. …
+ability to reduce generalized error. Random Forest and Boosted Trees are
+both examples of ensemble models. …
 
-## lm Model 1 -
+## Linear Model 1 - Full Linear Model
 
-**Full Linear Model** using all of our variables of interest. explain in
-more detail.
+**Full Linear Model**: using all of our variables of interest. explain
+in more detail.
 
 ``` r
 ## set up trainControl using 5-fold cross validation
@@ -507,40 +517,83 @@ NewtrnCntrl <- trainControl(method = "cv", number=5, repeats=3)
     ## Warning: `repeats` has no meaning for this resampling method.
 
 ``` r
-## now fit linear model for all of our chosen predictors
+## now fit linear model for our chosen predictors
 lmFit1 <- train(shares ~ n_tokens_title + average_token_length + global_rate_positive_words +
                          global_rate_negative_words + num_imgs + num_videos + num_hrefs,
                 data = newsTrain,
                 method = "lm",
                 trControl = trnCntrl,
                 preProcess = c("center", "scale"))
-##pre process
 
+## print model 
+lmFit1
+```
 
+    ## Linear Regression 
+    ## 
+    ## 1472 samples
+    ##    7 predictor
+    ## 
+    ## Pre-processing: centered (7), scaled (7) 
+    ## Resampling: Cross-Validated (5 fold) 
+    ## Summary of sample sizes: 1178, 1177, 1180, 1177, 1176 
+    ## Resampling results:
+    ## 
+    ##   RMSE      Rsquared     MAE     
+    ##   7844.875  0.004304763  3287.255
+    ## 
+    ## Tuning parameter 'intercept' was held constant at a value of TRUE
+
+``` r
 ## Now predict on the TEST data!
 lmFit1.pred <- predict(lmFit1, newdata = newsTest)
 ```
 
-## lm Model 2 -
+## Linear Model 2 - Polynomial Regression
 
-**Linear Model** using all of the two- way interactions between our
-chosen predictors
+**Linear Model - Polynomial Regression**: extending the linear
+regression model above but including higher order terms by squaring all
+predictors in the model.
 
 ``` r
-lmFit2 <- train(shares ~ (n_tokens_title + average_token_length + global_rate_positive_words +
-                         global_rate_negative_words + num_imgs + num_videos + num_hrefs)^2,
+lmFit2 <- train(shares ~ I(n_tokens_title^2) + I(average_token_length^2) + 
+                         I(global_rate_positive_words^2) +I(global_rate_negative_words^2) + 
+                         I(num_imgs^2) + I(num_videos^2) + I(num_hrefs^2),
                 data = newsTrain,
                 method = "lm",
                 preProcess = c("center", "scale"),
                 trControl = trnCntrl)
+
+## print model 
+lmFit2
+```
+
+    ## Linear Regression 
+    ## 
+    ## 1472 samples
+    ##    7 predictor
+    ## 
+    ## Pre-processing: centered (7), scaled (7) 
+    ## Resampling: Cross-Validated (5 fold) 
+    ## Summary of sample sizes: 1177, 1179, 1177, 1177, 1178 
+    ## Resampling results:
+    ## 
+    ##   RMSE      Rsquared     MAE     
+    ##   13945.24  0.001337606  3770.275
+    ## 
+    ## Tuning parameter 'intercept' was held constant at a value of TRUE
+
+``` r
 ## Now predict on the TEST data!
 lmFit2.pred <- predict(lmFit2, newdata = newsTest)
 ```
 
-## Ensemble 1 -
+## Ensemble 1 - Random Forest
 
-**Random Forest Model**. This is a random forest model using all
-variables we have selected for analysis as predictors.
+**Random Forest Model**: This is a random forest model using all
+variables we have selected for analysis as predictors. Note that we are
+using `mtry=1:5`where `mtry` is a tuning parameter for the number of
+randomly selected predictors.
 
 ``` r
 rfFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_positive_words +
@@ -549,19 +602,51 @@ rfFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_posi
                   method = "rf",
                   trControl = NewtrnCntrl,
                   preProcess = c("center", "scale"),
-                  tuneGrid = data.frame(mtry= 1:7))
+                  tuneGrid = data.frame(mtry= 1:5))
 
+## print model 
+rfFit
+```
+
+    ## Random Forest 
+    ## 
+    ## 1472 samples
+    ##    7 predictor
+    ## 
+    ## Pre-processing: centered (7), scaled (7) 
+    ## Resampling: Cross-Validated (5 fold) 
+    ## Summary of sample sizes: 1177, 1178, 1177, 1178, 1178 
+    ## Resampling results across tuning parameters:
+    ## 
+    ##   mtry  RMSE      Rsquared     MAE     
+    ##   1     7510.391  0.007825667  3262.997
+    ##   2     7668.288  0.005315095  3347.367
+    ##   3     7872.844  0.004014322  3431.127
+    ##   4     8061.319  0.003923640  3476.012
+    ##   5     8170.469  0.003524707  3506.216
+    ## 
+    ## RMSE was used to select the optimal model using the smallest value.
+    ## The final value used for the model was mtry = 1.
+
+``` r
+## Now predict on the TEST data!
 rfFit.pred <- predict(rfFit, newdata = newsTest)
 ```
 
-## Ensemble 2 -
+## Ensemble 2 - Boosted Tree
 
-**Boosted Tree Model**. This is a boosted tree model using all variables
-we have selected for analysis as predictors.
+**Boosted Tree Model**: This is a boosted tree model using all variables
+we have selected for analysis as predictors. We are first creating an
+object `gbmGrid` which includes varying arguments. First,
+`interaction.depth` is set to establish the maximum tree depth. Next,
+`n.trees` is setting the number of boosting iterations. The `shrinkage`
+argument is setting a shrinkage value and lastly, the `n.minobsinnode`
+argument sets the minimum terminal node sizes.
 
 ``` r
+## set a grid of parameters for our Boosted Tree Model
 gbmGrid <-  expand.grid(interaction.depth = c(1,2,3,4), 
-                        n.trees = c(25,50,100,150,200), 
+                        n.trees = c(50,100,150,200), 
                         shrinkage = 0.1,
                         n.minobsinnode = 10)
 
@@ -574,6 +659,47 @@ boostFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_p
                   tuneGrid = gbmGrid,
                   verbose = FALSE)
 
+## print model
+boostFit
+```
+
+    ## Stochastic Gradient Boosting 
+    ## 
+    ## 1472 samples
+    ##    7 predictor
+    ## 
+    ## Pre-processing: centered (7), scaled (7) 
+    ## Resampling: Cross-Validated (5 fold) 
+    ## Summary of sample sizes: 1178, 1178, 1178, 1177, 1177 
+    ## Resampling results across tuning parameters:
+    ## 
+    ##   interaction.depth  n.trees  RMSE      Rsquared     MAE     
+    ##   1                   50      7840.318  0.014483561  3312.728
+    ##   1                  100      7834.560  0.016199525  3328.946
+    ##   1                  150      7858.220  0.009631089  3289.617
+    ##   1                  200      7836.751  0.006010009  3282.375
+    ##   2                   50      7872.319  0.012205607  3318.403
+    ##   2                  100      7851.089  0.005911130  3314.017
+    ##   2                  150      7898.734  0.002608779  3328.601
+    ##   2                  200      7967.227  0.001915455  3357.738
+    ##   3                   50      7882.633  0.005012197  3314.264
+    ##   3                  100      8026.152  0.003213168  3386.804
+    ##   3                  150      8166.095  0.002288559  3513.835
+    ##   3                  200      8172.084  0.003020428  3578.122
+    ##   4                   50      7886.029  0.016815656  3315.103
+    ##   4                  100      8053.739  0.005628452  3471.359
+    ##   4                  150      8181.416  0.005564406  3565.702
+    ##   4                  200      8273.670  0.003837138  3658.510
+    ## 
+    ## Tuning parameter 'shrinkage' was held constant at a value of 0.1
+    ## Tuning parameter 'n.minobsinnode' was
+    ##  held constant at a value of 10
+    ## RMSE was used to select the optimal model using the smallest value.
+    ## The final values used for the model were n.trees = 100, interaction.depth = 1, shrinkage = 0.1 and
+    ##  n.minobsinnode = 10.
+
+``` r
+## Now predict on the TEST data!
 boostFitPred <- predict(boostFit, newdata = newsTest)
 ```
 
@@ -587,35 +713,37 @@ This section will be dedicated to comparing our models via the RMSE
 metric only.
 
 We will be using the `predict()` function that we used above after
-fitting each fo the models, along with base R functions like `sqrt()`
+fitting each of the models, along with base R functions like `sqrt()`
 and `mean()` to calculate RMSE by hand.
 
 ``` r
-## Find RMSE for linear model fit 1
+## Find RMSE for Full Linear model (lmFit1)
 lmFit1.RMSE <- sqrt(mean((lmFit1.pred-newsTest$shares)^2))
 
-## Find RMSE for linear model fit 2
+## Find RMSE for Polynomial Regression (lmFit2)
 lmFit2.RMSE <- sqrt(mean((lmFit2.pred-newsTest$shares)^2))
 
-## Find RMSE for random forest model
+## Find RMSE for Random Forest model (rfFit)
 rfFit.RMSE <- sqrt(mean((rfFit.pred-newsTest$shares)^2))
 
-## Find RMSE for boosted tree model 
+## Find RMSE for Boosted Tree model (boostFit)
 boostFit.RMSE <- sqrt(mean((boostFitPred-newsTest$shares)^2))
 ```
 
 Now we can create a table of all of the RMSE values to get a better
-visual of how these values differ among model fits.
+visual of how these values differ among model fits. We will also
+calculate the minimum RMSE to set up the automation for the best model.
 
 ``` r
 ## create data frame of all RMSE values 
 all.RMSE <- data.frame(lmFit1.RMSE,lmFit2.RMSE,rfFit.RMSE,boostFit.RMSE)
-colnames(all.RMSE) <- c("Linear Reg #1", "Linear Reg #2", "Random Forest", "Boosted Tree")
+colnames(all.RMSE) <- c("Full Linear Regression", "Polynomial Regression", 
+                        "Random Forest", "Boosted Tree")
 all.RMSE
 ```
 
-    ##   Linear Reg #1 Linear Reg #2 Random Forest Boosted Tree
-    ## 1       10145.6      10680.27      10168.77     10211.94
+    ##   Full Linear Regression Polynomial Regression Random Forest Boosted Tree
+    ## 1                10145.6              10125.11      10169.25     10322.33
 
 ``` r
 ## use which.min to find the element in the data frame with the lowest RMSE
@@ -623,12 +751,17 @@ minRMSE <- which.min(all.RMSE)
 minRMSE
 ```
 
-    ## Linear Reg #1 
-    ##             1
+    ## Polynomial Regression 
+    ##                     2
 
 ``` r
-## now automate 
+## now we can automate 
+```
+
+Thus,
+
+``` r
 paste0("The model with the lowest RMSE value is the ", colnames(all.RMSE)[minRMSE] , " model")
 ```
 
-    ## [1] "The model with the lowest RMSE value is the Linear Reg #1 model"
+    ## [1] "The model with the lowest RMSE value is the Polynomial Regression model"
