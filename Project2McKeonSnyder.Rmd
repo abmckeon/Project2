@@ -44,7 +44,7 @@ The following our are variables of interest:
 * **num_videos** - Number of videos
 * **num_hrefs** - Number of links
 
-For categorical variables, we will be using the following varibles. In fact, we will be combining the days of the week into one variable called **dayOfWeek** and the method of its creation will be described as it arises.
+For categorical variables, we will be using the following variables. In fact, we will be combining the days of the week into one variable called **dayOfWeek** and the method of its creation will be described as it arises.
 
 * **weekday_is_monday** - Was the article published on a Monday?
 * **weekday_is_tuesday** - Was the article published on a Tuesday?
@@ -92,7 +92,8 @@ library(knitr)
 
 ```
 
-```{r channel automation}
+```{r channel automation, eval=FALSE}
+## just eval=FALSE-ing this so i can commit and check github pages
 channel <- c("Business", "Entertainment", "Lifestyle", "Social Media", "Tech", "World", "Other")
 
 output_file = paste0(channel, ".md")
@@ -101,7 +102,7 @@ params <- lapply(channel, FUN= function(x){list(channel=x)})
 
 reports <- tibble(output_file, params)
 
-apply(reports, margin =1,FUN=function(x)  
+apply(reports, MARGIN = 1,FUN=function(x)  
   {rmarkdown::render("Project2McKeonSnyder.Rmd",
                      output_format = "github_document",
                      output_file = x[[1]],
@@ -232,7 +233,7 @@ It does appear from the table that publication frequency is much higher Monday t
 This section is dedicated to visualization by means of the `ggplot2` package. 
 (edit the toc headings below)  
 
-## Plot 1 -
+## Plot 1 - Scstterplot
 
 We first want to visually examine if there is relationship between title length and the amount of times an article is shared. 
 
@@ -249,7 +250,7 @@ scatterplotTitle <- ggplot(newsTrain, aes(x= `n_tokens_title`, y= `shares`)) +
 
 We can see from the scatterplot that there does not seem to be a linear relationship between title length and the amount of times an article is shared, as evidenced by the extremely weak correlation of 0.01. 
 
-## Plot 2 -
+## Plot 2 - Scatterplot
 What if now we are interested in determining if there is relationship between content length and the amount of times an article is shared. 
 
 ```{r}
@@ -265,7 +266,7 @@ scatterplotLength <- ggplot(newsTrain, aes(x= `average_token_length`, y= `shares
 
 The scatterplot shows that similar to the previous analysis using title length and shares, there does not seem to be a linear relationship between content length and the amount of times an article is shared, as evidenced by the extremely weak correlation of -0.02. 
 
-## Plot 3 -
+## Plot 3 - Barplot
 We can use a bar graph to determine if any data channels are published more on weekdays then on weekends.
 
 ```{r}
@@ -275,8 +276,9 @@ barplotDay + geom_bar() +
 ```
 We can see from the plot that there is a very apparent difference between  the number of articles published on weekdays vs. weekends, with articles published on weekdays being much higher. 
 
-## Plot 4 -
-This is a histogram of the shares variable. We wanted to get a better idea of how this response variable is distributed.  
+## Plot 4 - Histogram
+
+This is a histogram of the shares variable. We wanted to get a better idea of how this response variable is distributed and figured it was best to transform the data via a log transformation. This method is useful when dealing with skewed data and can make the data more interpretable. When looking at this plot, we hope to see a fairly Normal distribution.  
 
 ```{r}
 hist.shares <- ggplot(data = newsTrain, aes(x = log(shares)))
@@ -286,28 +288,32 @@ hist.shares + geom_histogram(bins = 45, fill = "lightblue", colour = 8) +
 
 ```
 
-## Plot 5 -
+## Plot 5 - Scatterplot
 
-Next we will plot the number of images versus the number of shares. This will be done via a scatterplot because this will be able to give us a better visual of how these data are represented and if they are associated with one another.  
+Next we will plot the number of links versus the number of shares. This will be done via a scatterplot because this will be able to give us a better visual of how these data are represented and if they are associated with one another. When looking at this plot, one should take note of a positive or negative correlation. For example, if we see a positive correlation, we can suggest that articles with a greater number of links tend to be shared more.
 
 ```{r}
-sp1 <- ggplot(data = newsTrain, aes(x = shares, y = num_imgs))
-sp1 + geom_point()
+## First, find correlation to plot on graph
+correlation3 <- cor(newsTrain$num_hrefs, newsTrain$shares) 
+sp1 <- ggplot(data = newsTrain, aes(x = num_hrefs, y = shares))
+sp1 + geom_point() + geom_smooth(method = "lm", col = "purple") +
+  ggtitle("Number of Links vs. Shares") +
+  geom_text(x = 120, y = 150000, size = 5, label = paste0("Corr = ", round(correlation3,2)))
 
-sp2 <- ggplot(data = newsTrain, aes(x = shares, y = num_hrefs))
-sp2 + geom_point()
 
-## BOXPLOT NUM IMGS BY DAY!
+
+
 ```
 
 
-## Plot 6 -
+## Plot 6 - Boxplot
 
-Boxplots!  
+Below is a boxplot that assesses the number of images based on each day of the week. These plots will give us a better resprentation of how our data is distributed per each day of the week. One should take note of any outliers and/or skewness that is present and be able to identify the median.
+
 ```{r}
 bp1 <- ggplot(data = newsTrain, aes(x=dayOfWeek, y=num_imgs, fill=dayOfWeek))
-bp1 + geom_boxplot() + ggtitle("Boxplot: num_imgs per dayOfWeek")
-## + geom_jitter() 
+bp1 + geom_boxplot() + ggtitle("Boxplot: Number of Images per Day of Week")
+
 ```
 
 
