@@ -8,6 +8,7 @@ Owen Snyder and Ashlee McKeon
     -   [Variable Selection](#variable-selection)
     -   [Methods](#methods)
     -   [Packages](#packages)
+    -   [Automation Code](#automation-code)
 -   [Read in Data](#read-in-data)
 -   [Create New Variables](#create-new-variables)
     -   [Filter Data by Channel](#filter-data-by-channel)
@@ -36,7 +37,7 @@ Render Function
 rmarkdown::render("Project2McKeonSnyder.Rmd",
                   output_format = "github_document",
                   output_file = "README.md",
-                  params = list(dataChannel = "Lifestyle"),
+                  params = list(dataChannel = "Business"),
                   output_options = list(
                     html_preview = FALSE, toc = TRUE, toc_depth = 2, toc_float = TRUE)
 )
@@ -66,8 +67,8 @@ Because of the large variety of variables this data set includes, we
 decided to only consider a subset of the variables to work with.
 However, it is important to note one specific set of variables we will
 be basing our analysis on. We will be starting with the
-\*data_channel_is\_\*\* variables to see if they have any relation to
-the number of shares and the rest of the variables we select.
+*data_channel_is\_* \* variables to see if they have any relation to the
+number of shares and the rest of the variables we select.
 
 The following our are variables of interest:
 
@@ -151,6 +152,8 @@ library(caret)
 library(rmarkdown)
 library(knitr)
 ```
+
+## Automation Code
 
 ``` r
 ## just eval=FALSE-ing this so i can commit and check github pages
@@ -299,7 +302,7 @@ newsTrain %>% summarise(avgShares = mean(shares), medianShares = median(shares),
     ## # A tibble: 1 × 3
     ##   avgShares medianShares sdShares
     ##       <dbl>        <dbl>    <dbl>
-    ## 1     3645.         1700    8286.
+    ## 1     3266.         1400   17569.
 
 # Contingency Tables
 
@@ -525,16 +528,16 @@ lmFit1
 
     ## Linear Regression 
     ## 
-    ## 1472 samples
+    ## 4382 samples
     ##    7 predictor
     ## 
     ## Pre-processing: centered (7), scaled (7) 
     ## Resampling: Cross-Validated (5 fold) 
-    ## Summary of sample sizes: 1178, 1177, 1180, 1177, 1176 
+    ## Summary of sample sizes: 3505, 3506, 3506, 3505, 3506 
     ## Resampling results:
     ## 
-    ##   RMSE      Rsquared     MAE     
-    ##   7844.875  0.004304763  3287.255
+    ##   RMSE      Rsquared    MAE     
+    ##   13297.13  0.01107824  3044.896
     ## 
     ## Tuning parameter 'intercept' was held constant at a value of TRUE
 
@@ -564,16 +567,16 @@ lmFit2
 
     ## Linear Regression 
     ## 
-    ## 1472 samples
+    ## 4382 samples
     ##    7 predictor
     ## 
     ## Pre-processing: centered (7), scaled (7) 
     ## Resampling: Cross-Validated (5 fold) 
-    ## Summary of sample sizes: 1177, 1179, 1177, 1177, 1178 
+    ## Summary of sample sizes: 3505, 3506, 3506, 3505, 3506 
     ## Resampling results:
     ## 
     ##   RMSE      Rsquared     MAE     
-    ##   13945.24  0.001337606  3770.275
+    ##   15406.98  0.003358961  3067.576
     ## 
     ## Tuning parameter 'intercept' was held constant at a value of TRUE
 
@@ -604,20 +607,20 @@ rfFit
 
     ## Random Forest 
     ## 
-    ## 1472 samples
+    ## 4382 samples
     ##    7 predictor
     ## 
     ## Pre-processing: centered (7), scaled (7) 
     ## Resampling: Cross-Validated (5 fold) 
-    ## Summary of sample sizes: 1177, 1178, 1177, 1178, 1178 
+    ## Summary of sample sizes: 3506, 3506, 3505, 3505, 3506 
     ## Resampling results across tuning parameters:
     ## 
     ##   mtry  RMSE      Rsquared     MAE     
-    ##   1     7510.391  0.007825667  3262.997
-    ##   2     7668.288  0.005315095  3347.367
-    ##   3     7872.844  0.004014322  3431.127
-    ##   4     8061.319  0.003923640  3476.012
-    ##   5     8170.469  0.003524707  3506.216
+    ##   1     15852.15  0.009593264  3083.503
+    ##   2     16280.17  0.006392790  3241.602
+    ##   3     16754.66  0.003517205  3370.185
+    ##   4     17254.25  0.002214555  3467.356
+    ##   5     17823.52  0.001046437  3522.945
     ## 
     ## RMSE was used to select the optimal model using the smallest value.
     ## The final value used for the model was mtry = 1.
@@ -659,37 +662,37 @@ boostFit
 
     ## Stochastic Gradient Boosting 
     ## 
-    ## 1472 samples
+    ## 4382 samples
     ##    7 predictor
     ## 
     ## Pre-processing: centered (7), scaled (7) 
     ## Resampling: Cross-Validated (5 fold) 
-    ## Summary of sample sizes: 1178, 1178, 1178, 1177, 1177 
+    ## Summary of sample sizes: 3506, 3506, 3504, 3506, 3506 
     ## Resampling results across tuning parameters:
     ## 
     ##   interaction.depth  n.trees  RMSE      Rsquared     MAE     
-    ##   1                   50      7840.318  0.014483561  3312.728
-    ##   1                  100      7834.560  0.016199525  3328.946
-    ##   1                  150      7858.220  0.009631089  3289.617
-    ##   1                  200      7836.751  0.006010009  3282.375
-    ##   2                   50      7872.319  0.012205607  3318.403
-    ##   2                  100      7851.089  0.005911130  3314.017
-    ##   2                  150      7898.734  0.002608779  3328.601
-    ##   2                  200      7967.227  0.001915455  3357.738
-    ##   3                   50      7882.633  0.005012197  3314.264
-    ##   3                  100      8026.152  0.003213168  3386.804
-    ##   3                  150      8166.095  0.002288559  3513.835
-    ##   3                  200      8172.084  0.003020428  3578.122
-    ##   4                   50      7886.029  0.016815656  3315.103
-    ##   4                  100      8053.739  0.005628452  3471.359
-    ##   4                  150      8181.416  0.005564406  3565.702
-    ##   4                  200      8273.670  0.003837138  3658.510
+    ##   1                   50      15933.95  0.002746294  3176.571
+    ##   1                  100      15947.57  0.003153386  3192.708
+    ##   1                  150      16036.57  0.002875812  3208.230
+    ##   1                  200      16070.55  0.002921508  3203.883
+    ##   2                   50      16226.45  0.002262647  3243.263
+    ##   2                  100      16519.46  0.001959930  3321.596
+    ##   2                  150      16861.86  0.002420765  3394.099
+    ##   2                  200      17202.10  0.001949194  3451.658
+    ##   3                   50      16311.34  0.003409137  3307.415
+    ##   3                  100      16620.73  0.002897876  3379.883
+    ##   3                  150      16875.56  0.002409808  3475.924
+    ##   3                  200      17271.66  0.001814709  3614.054
+    ##   4                   50      16562.61  0.002223651  3343.905
+    ##   4                  100      16898.38  0.002098580  3491.637
+    ##   4                  150      17060.05  0.001776439  3579.774
+    ##   4                  200      17363.61  0.001829817  3699.735
     ## 
     ## Tuning parameter 'shrinkage' was held constant at a value of 0.1
     ## Tuning parameter 'n.minobsinnode' was
     ##  held constant at a value of 10
     ## RMSE was used to select the optimal model using the smallest value.
-    ## The final values used for the model were n.trees = 100, interaction.depth = 1, shrinkage = 0.1 and
+    ## The final values used for the model were n.trees = 50, interaction.depth = 1, shrinkage = 0.1 and
     ##  n.minobsinnode = 10.
 
 ``` r
@@ -737,7 +740,7 @@ all.RMSE
 ```
 
     ##   Full Linear Regression Polynomial Regression Random Forest Boosted Tree
-    ## 1                10145.6              10125.11      10169.25     10322.33
+    ## 1                5883.52              5822.586      6287.007     6315.069
 
 ``` r
 ## use which.min to find the element in the data frame with the lowest RMSE

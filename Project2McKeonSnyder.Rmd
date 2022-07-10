@@ -12,7 +12,7 @@ Render Function
 rmarkdown::render("Project2McKeonSnyder.Rmd",
                   output_format = "github_document",
                   output_file = "README.md",
-                  params = list(dataChannel = "Lifestyle"),
+                  params = list(dataChannel = "Business"),
                   output_options = list(
                     html_preview = FALSE, toc = TRUE, toc_depth = 2, toc_float = TRUE)
 )
@@ -31,7 +31,7 @@ The main goal of this project is to create predictive models based on data from 
 
 ## Variable Selection
 
-Because of the large variety of variables this data set includes, we decided to only consider a subset of the variables to work with. However, it is important to note one specific set of variables we will be basing our analysis on. We will be starting with the *data_channel_is_** variables to see if they have any relation to the number of shares and the rest of the variables we select.  
+Because of the large variety of variables this data set includes, we decided to only consider a subset of the variables to work with. However, it is important to note one specific set of variables we will be basing our analysis on. We will be starting with the *data_channel_is_* * variables to see if they have any relation to the number of shares and the rest of the variables we select.  
 
 The following our are variables of interest:  
 
@@ -92,6 +92,7 @@ library(knitr)
 
 ```
 
+## Automation Code
 ```{r channel automation, eval=FALSE}
 ## just eval=FALSE-ing this so i can commit and check github pages
 dataChannel <- c("Business", "Entertainment", "Lifestyle", "Social Media", "Tech", "World")
