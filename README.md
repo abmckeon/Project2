@@ -6,6 +6,7 @@ Owen Snyder
 -   [Description of Repo](#description-of-repo)
 -   [Render Function](#render-function)
 -   [Automation Code](#automation-code)
+-   [Outputs of Analysis](#outputs-of-analysis)
 
 ## Description of Repo
 
@@ -54,3 +55,10 @@ apply(reports, MARGIN = 1,
                      output_file = x[[1]],
                      params = x[[2]])})
 ```
+
+## Outputs of Analysis
+
+The analysis for [Business articles is available
+here](https://github.com/abmckeon/Project2McKeonSnyder/blob/main/Business.html).  
+The analysis for [Entertainment articles is available
+here](https://github.com/abmckeon/Project2McKeonSnyder/blob/main/Entertainment.html)
