@@ -152,7 +152,7 @@ newsData <- newsData %>% mutate(dataChannel =
                                ifelse(weekday_is_saturday==1, "Weekend",
                                ifelse(weekday_is_sunday==1, "Weekend", "NULL"))))))))
 
-## Upo inspection, there are NA values present, this could be due to some articles not having
+## Upon inspection, there are NA values present, this could be due to some articles not having
 ## one of these specific categories. Thus, we set all NA values for dataChannel to be "Other".
 ## However, "Other" will not be analyzed.
 
@@ -160,7 +160,7 @@ newsData <- newsData %>% mutate(dataChannel =
 
 ## Filter Data by Channel
 
-Here, we can filter the data by each specfic data channel. This will become helpful upon automation.  
+Here, we can filter the data by each specific data channel. This will become helpful upon automation.  
 ```{r}
 newsData.busn <- newsData %>% filter(dataChannel=="Business")
 newsData.ent <- newsData %>% filter(dataChannel=="Entertainment")
@@ -228,7 +228,7 @@ This section is dedicated to visualization by means of the `ggplot2` package. We
 
 We first want to visually examine if there is relationship between title length and the amount of times an article is shared. 
 
-```{r}
+```{r warning=FALSE}
 correlation1 <- cor(newsData$n_tokens_title, newsData$shares)
 
 scatterplotTitle <- ggplot(newsTrain, aes(x= `n_tokens_title`, y= `shares`)) +
@@ -237,17 +237,14 @@ scatterplotTitle <- ggplot(newsTrain, aes(x= `n_tokens_title`, y= `shares`)) +
   geom_smooth(method = 'lm') +
   geom_smooth(col = "blue") +
   geom_text(x = 12, y = 175000, size = 4, label = paste0("Correlation = ", round(correlation1, 2)))
-<<<<<<< HEAD
 scatterplotTitle
-=======
-scatterplotTitle 
->>>>>>> c7969f46ac9a647cfa5fbb09a80e46aa053b55af
+
 ```
 
 ## Plot 2 - Scatterplot
 What if now we are interested in determining if there is relationship between content length and the amount of times an article is shared. 
 
-```{r}
+```{r warning=FALSE}
 correlation2 <- cor(newsData$average_token_length, newsData$shares)
 
 scatterplotLength <- ggplot(newsTrain, aes(x= `average_token_length`, y= `shares`)) +
@@ -268,16 +265,15 @@ barplotDay <- ggplot(data = newsTrain, aes(y= `weekdayWeekend`, fill = weekdayWe
 barplotDay + geom_bar() + 
   labs(title= "Publication on Weekday vs. Weekend")
 ```
-<<<<<<< HEAD
+
 We can see from the plot that there is a very apparent difference between the number of articles published on weekdays vs. weekends, with articles published on weekdays being much higher. 
-=======
->>>>>>> c7969f46ac9a647cfa5fbb09a80e46aa053b55af
+
 
 ## Plot 4 - Histogram
 
 This is a histogram of the shares variable. We wanted to get a better idea of how this response variable is distributed and figured it was best to transform the data via a log transformation. This method is useful when dealing with skewed data and can make the data more interpretable. When looking at this plot, we hope to see a fairly Normal distribution.  
 
-```{r}
+```{r warning=FALSE}
 hist.shares <- ggplot(data = newsTrain, aes(x = log(shares)))
 hist.shares + geom_histogram(bins = 45, fill = "lightblue", colour = 8) +
               ggtitle("Log Transformation of Shares")
@@ -287,13 +283,13 @@ hist.shares + geom_histogram(bins = 45, fill = "lightblue", colour = 8) +
 
 Next we will plot the number of links versus the number of shares. This will be done via a scatterplot because this will be able to give us a better visual of how these data are represented and if they are associated with one another. When looking at this plot, one should take note of a positive or negative correlation. For example, if we see a positive correlation, we can suggest that articles with a greater number of links tend to be shared more.
 
-```{r}
+```{r warning=FALSE}
 ## First, find correlation to plot on graph
 correlation3 <- cor(newsTrain$num_hrefs, newsTrain$shares) 
 sp1 <- ggplot(data = newsTrain, aes(x = num_hrefs, y = shares))
 sp1 + geom_point() + geom_smooth(method = "lm", col = "purple") +
   ggtitle("Number of Links vs. Shares") +
-  geom_text(x = 120, y = 150000, size = 5, label = paste0("Corr = ", round(correlation3,2)))
+  geom_text(x = 70, y = 150000, size = 5, label = paste0("Corr = ", round(correlation3,2)))
 
 ```
 
@@ -323,7 +319,7 @@ First, it is important to describe in detail the methods behind each of these mo
 
 ## Linear Model 1 - Full Linear Model
 
-**Full Linear Model**: using all of our variables of interest. explain in more detail.
+**Full Linear Model**: Using all of our variables of interest. We first wanted to see how well a full linear model would fit when using our predictors to asses the number of shares. From this first model, each additional model we make will become more complex.
 
 ```{r}
 ## set up trainControl using 5-fold cross validation
@@ -349,7 +345,7 @@ lmFit1.pred <- predict(lmFit1, newdata = newsTest)
 
 ## Linear Model 2 - Polynomial Regression
 
-**Linear Model - Polynomial Regression**: extending the linear regression model above but including higher order terms by squaring all predictors in the model.  
+**Linear Model - Polynomial Regression**: Extending the linear regression model above but including higher order terms by squaring all predictors in the model.  
 
 ```{r}
 lmFit2 <- train(shares ~ I(n_tokens_title^2) + I(average_token_length^2) + 
@@ -370,7 +366,7 @@ lmFit2.pred <- predict(lmFit2, newdata = newsTest)
 
 ## Ensemble 1 - Random Forest
 
-**Random Forest Model**: This is a random forest model using all variables we have selected for analysis as predictors. Note that we are using `mtry=1:5`where `mtry` is a tuning parameter for the number of randomly selected predictors.
+**Random Forest Model**: This is a random forest model using all variables we have selected for analysis as predictors. Note that we are using `mtry=1:5`where `mtry` is a tuning parameter for the number of randomly selected predictors.  
 
 ```{r}
 rfFit <- train(shares ~ n_tokens_title + average_token_length + global_rate_positive_words +

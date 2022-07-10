@@ -241,14 +241,14 @@ newsData <- newsData %>% mutate(dataChannel =
                                ifelse(weekday_is_saturday==1, "Weekend",
                                ifelse(weekday_is_sunday==1, "Weekend", "NULL"))))))))
 
-## Upo inspection, there are NA values present, this could be due to some articles not having
+## Upon inspection, there are NA values present, this could be due to some articles not having
 ## one of these specific categories. Thus, we set all NA values for dataChannel to be "Other".
 ## However, "Other" will not be analyzed.
 ```
 
 ## Filter Data by Channel
 
-Here, we can filter the data by each specfic data channel. This will
+Here, we can filter the data by each specific data channel. This will
 become helpful upon automation.
 
 ``` r
@@ -371,11 +371,7 @@ scatterplotTitle
 
     ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 
-![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
-
-We can see from the scatterplot that there does not seem to be a linear
-relationship between title length and the amount of times an article is
-shared, as evidenced by the extremely weak correlation of 0.01.
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ## Plot 2 - Scatterplot
 
@@ -398,12 +394,7 @@ scatterplotLength
 
     ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 
-![](README_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
-
-The scatterplot shows that similar to the previous analysis using title
-length and shares, there does not seem to be a linear relationship
-between content length and the amount of times an article is shared, as
-evidenced by the extremely weak correlation of -0.02.
+![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ## Plot 3 - Barplot
 
@@ -416,10 +407,11 @@ barplotDay + geom_bar() +
   labs(title= "Publication on Weekday vs. Weekend")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-32-1.png)<!-- --> We can see
-from the plot that there is a very apparent difference between the
-number of articles published on weekdays vs. weekends, with articles
-published on weekdays being much higher.
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+
+We can see from the plot that there is a very apparent difference
+between the number of articles published on weekdays vs. weekends, with
+articles published on weekdays being much higher.
 
 ## Plot 4 - Histogram
 
@@ -436,7 +428,7 @@ hist.shares + geom_histogram(bins = 45, fill = "lightblue", colour = 8) +
               ggtitle("Log Transformation of Shares")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ## Plot 5 - Scatterplot
 
@@ -454,12 +446,12 @@ correlation3 <- cor(newsTrain$num_hrefs, newsTrain$shares)
 sp1 <- ggplot(data = newsTrain, aes(x = num_hrefs, y = shares))
 sp1 + geom_point() + geom_smooth(method = "lm", col = "purple") +
   ggtitle("Number of Links vs. Shares") +
-  geom_text(x = 120, y = 150000, size = 5, label = paste0("Corr = ", round(correlation3,2)))
+  geom_text(x = 70, y = 150000, size = 5, label = paste0("Corr = ", round(correlation3,2)))
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](README_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 ## Plot 6 - Boxplot
 
@@ -474,7 +466,7 @@ bp1 <- ggplot(data = newsTrain, aes(x=dayOfWeek, y=num_imgs, fill=dayOfWeek))
 bp1 + geom_boxplot() + ggtitle("Boxplot: Number of Images per Day of Week")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 # Modeling
 
@@ -504,8 +496,10 @@ both examples of ensemble models. …
 
 ## Linear Model 1 - Full Linear Model
 
-**Full Linear Model**: using all of our variables of interest. explain
-in more detail.
+**Full Linear Model**: Using all of our variables of interest. We first
+wanted to see how well a full linear model would fit when using our
+predictors to asses the number of shares. From this first model, each
+additional model we make will become more complex.
 
 ``` r
 ## set up trainControl using 5-fold cross validation
@@ -551,7 +545,7 @@ lmFit1.pred <- predict(lmFit1, newdata = newsTest)
 
 ## Linear Model 2 - Polynomial Regression
 
-**Linear Model - Polynomial Regression**: extending the linear
+**Linear Model - Polynomial Regression**: Extending the linear
 regression model above but including higher order terms by squaring all
 predictors in the model.
 
