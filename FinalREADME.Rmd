@@ -1,6 +1,6 @@
 ---
 title: "Project 2 render&automation code"
-author: "Owen Snyder"
+author: "Owen Snyder and Ashlee McKeon"
 date: '2022-07-10'
 output: github_document
 ---
@@ -22,8 +22,20 @@ Below is a list of necessary packages that will aid our data analysis and modeli
 
 
 ## Render Function
-  
+
 ```{r eval=FALSE}
+rmarkdown::render("Project2McKeonSnyder.Rmd",
+                  output_format = "github_document",
+                  output_file = "READmeFinal.md",
+                  params = list(dataChannel = "Lifestyle"),
+                  output_options = list(
+                    html_preview = FALSE, toc = TRUE, toc_depth = 2, toc_float = TRUE)
+)
+```
+  
+  
+```{r eval=FALSE, echo=FALSE}
+## code to render readme document, decided i wanted to do it this way
 rmarkdown::render("FinalREADME.Rmd",
                   output_format = "github_document",
                   output_file = "README.md",
