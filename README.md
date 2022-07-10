@@ -74,8 +74,12 @@ apply(reports, MARGIN = 1,
 
 ## Outputs of Analysis
 
-The analysis for [Business articles is available
-here](https://github.com/abmckeon/Project2McKeonSnyder/blob/main/Business.html).  
+The analysis for [Business articles is available here](Business.html).  
 The analysis for [Entertainment articles is available
-here](https://github.com/abmckeon/Project2McKeonSnyder/blob/main/Entertainment.html)  
-The analysis for [Lifestyle articles is available here](Lifestyle.html)
+here](Entertainment.html)  
+The analysis for [Lifestyle articles is available
+here](Lifestyle.html)  
+The analysis for [Social Media articles is available
+here](Social%20Media.html)  
+The analysis for [Tech articles is available here](Tech.html)  
+The analysis for [World articles is available here](World.html)
