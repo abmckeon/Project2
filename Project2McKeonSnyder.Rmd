@@ -11,8 +11,8 @@ Render Function
 ```{r eval=FALSE}
 rmarkdown::render("Project2McKeonSnyder.Rmd",
                   output_format = "github_document",
-                  output_file = "README.md",
-                  params = list(dataChannel = "Business"),
+                  output_file = "READmeFinal.md",
+                  params = list(dataChannel = "Lifestyle"),
                   output_options = list(
                     html_preview = FALSE, toc = TRUE, toc_depth = 2, toc_float = TRUE)
 )
@@ -119,7 +119,7 @@ apply(reports, MARGIN = 1,
 setwd("~/Desktop")
 newsData <- read_csv("OnlineNewsPopularity.csv")
 newsData
-## need to change working dir
+
 
 ```
 
